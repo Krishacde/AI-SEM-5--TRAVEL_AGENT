@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>TripMate AI · Multi-Agent Travel Planner</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
   <div class="page-bg">
     <div class="gradient-circle circle-1"></div>
@@ -17,7 +19,8 @@
     <section class="hero-section">
       <div class="badge">✈️ TripMate AI · Gemini + LangGraph</div>
       <h1>Plan with research, not guesses.</h1>
-      <p>Multi-agent LangGraph system with evidence-backed itineraries, interactive flight & hotel selections, and instant replanning.</p>
+      <p>Multi-agent LangGraph system with evidence-backed itineraries, interactive flight & hotel selections, and
+        instant replanning.</p>
     </section>
 
     <!-- DISCOVERY HANDOFF BANNER (Shown when redirected from 'Help me choose') -->
@@ -35,7 +38,7 @@
     <section class="planner-card" id="planner">
       <div class="step-label">Trip Planning Hub</div>
       <h2>How would you like to plan?</h2>
-      
+
       <div class="mode-grid">
         <button class="mode-card active" data-mode="known" type="button">
           <span>📍</span>
@@ -169,11 +172,12 @@
     <div class="assistant-heading">
       <div>
         <div class="assistant-title">✨ Replanning Agent</div>
-        <div class="assistant-subtitle">Instruct the agent what to modify. Affected activities update instantly while preserving confirmed flights and hotels.</div>
+        <div class="assistant-subtitle">Instruct the agent what to modify. Affected activities update instantly while
+          preserving confirmed flights and hotels.</div>
       </div>
       <button class="assistant-close" aria-label="Close">×</button>
     </div>
-    
+
     <div class="quick-changes">
       <button type="button" data-replan="Cheaper and budget-friendly">💰 Cheaper</button>
       <button type="button" data-replan="Less walking and more cabs">🚶 Less walking</button>
@@ -182,7 +186,7 @@
       <button type="button" data-replan="More nature viewpoints and scenic spots">🌿 More nature</button>
       <button type="button" data-replan="Make itinerary slower and more relaxed">☕ More relaxed</button>
     </div>
-    
+
     <div class="change-input">
       <input id="changeText" placeholder="e.g. Replace walking tour with a boat ride, or make Day 2 more relaxed">
       <button id="applyChange" aria-label="Update itinerary" type="button">➤</button>
@@ -200,4 +204,5 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="/static/script.js"></script>
 </body>
+
 </html>
