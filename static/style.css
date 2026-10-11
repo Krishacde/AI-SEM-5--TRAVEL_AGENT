@@ -251,7 +251,7 @@ select:focus {
     font-size: 0.88rem;
 }
 
-.choices > div,
+.choices>div,
 .tag-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -627,8 +627,13 @@ select:focus {
 }
 
 @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
 }
 
 .selection-drawer-content {
@@ -916,7 +921,7 @@ select:focus {
     gap: 10px;
 }
 
-.budget-grid > div {
+.budget-grid>div {
     display: grid;
     gap: 6px;
     padding: 12px;
@@ -1085,8 +1090,15 @@ select:focus {
 }
 
 @keyframes fadeInSlide {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .banner-content {
@@ -1141,9 +1153,9 @@ select:focus {
 }
 
 .date-input-box::-webkit-calendar-picker-indicator {
-    filter: invert(1);
+    filter: brightness(0) invert(1);
+    opacity: 1;
     cursor: pointer;
-    opacity: 0.8;
 }
 
 .date-input-box::-webkit-calendar-picker-indicator:hover {
@@ -1840,4 +1852,3 @@ footer {
         bottom: 16px;
     }
 }
-
