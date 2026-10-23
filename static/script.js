@@ -744,8 +744,56 @@ function renderTrip(trip) {
     </div>
   `;
 
+  // ── Planner decision note ──
+  let plannerHtml = "";
+  const ep = trip.execution_plan;
+  if (ep) {
+    const skipped = [];
+    if (!ep.include_flights)         skipped.push("Flights");
+    if (!ep.include_trains)          skipped.push("Trains");
+    if (!ep.include_events)          skipped.push("Events");
+    if (!ep.include_places)          skipped.push("Places");
+    if (!ep.include_hotels)          skipped.push("Hotels");
+    if (!ep.include_travel_insights) skipped.push("Travel Insights");
+    const skippedText = skipped.length
+      ? `Skipped: <strong>${skipped.join(", ")}</strong>`
+      : "All agents active";
+    plannerHtml = section("\u{1F9E0} Planner Decision", `
+      <div style="padding:.6rem 1rem">
+        <p style="margin:0 0 .35rem"><strong>Reasoning:</strong> ${esc(ep.reasoning || "\u2014")}</p>
+        <p style="margin:0"><strong>Primary transport:</strong> ${esc(ep.primary_transport || "flight")} \u00B7 ${skippedText}</p>
+      </div>
+    `, "AI Planner");
+  }
+
+  // ── Critic review badge ──
+  let criticHtml = "";
+  const revCount = trip.revision_count || 0;
+  const critiqueHist = trip.critique_history || [];
+  if (critiqueHist.length > 0) {
+    const last = critiqueHist[critiqueHist.length - 1];
+    const issueItems = (last.issues || []).map(i =>
+      `<li><span class="status-badge ${i.severity === 'high' ? 'UNAVAILABLE' : 'ESTIMATED'}">${esc(i.severity)}</span> ${esc(i.description)}</li>`
+    ).join("");
+    const issueList = issueItems
+      ? `<ul style="margin:.4rem 0 0;padding-left:1.2rem;font-size:.92em">${issueItems}</ul>`
+      : `<p style="margin:.3rem 0 0;color:#6dffb0;font-size:.92em">\u2713 No issues found</p>`;
+    const badge = last.verdict === "approve" ? "Approved" : "Revised";
+    criticHtml = section("\uD83D\uDD0D Itinerary Review", `
+      <div style="padding:.6rem 1rem">
+        <p style="margin:0 0 .3rem">
+          <strong>Reviewed ${revCount} time(s)</strong> \u00B7 Final verdict:
+          <span class="section-tag">${esc(badge)}</span>
+        </p>
+        ${issueList}
+      </div>
+    `, "Quality Check");
+  }
+
   const dashboardHtml = `
     ${tripSummaryHtml}
+    ${plannerHtml}
+    ${criticHtml}
     ${section("Day-by-Day Verified Itinerary", renderItinerary(trip.itinerary_items), "Interactive Schedule")}
     ${section("Flight Options (Select to add to Itinerary)", renderFlightCards(trip.flights), "Live / Estimated")}
     ${section("Train Options (Select to add to Itinerary)", renderTrainCards(trip.trains), "Live / Estimated")}
