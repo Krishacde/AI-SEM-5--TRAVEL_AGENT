@@ -26,6 +26,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from tools.tavily_tool import tavily_search
 from tools.flight_tool import search_flights
+from tools.train_tool import search_trains
 
 load_dotenv()
 
@@ -51,6 +52,8 @@ if not has_file:
 
 os.environ.setdefault("SSL_CERT_FILE", certifi.where())
 os.environ.setdefault("REQUESTS_CA_BUNDLE", certifi.where())
+
+MAX_REVISIONS = 2  # Hard cap on itinerary revision loops (Gemini free-tier quota is limited)
 
 DataStatus = Literal["LIVE", "VERIFIED", "ESTIMATED", "AI_RECOMMENDATION", "USER_PROVIDED", "CREATOR_REPORTED", "UNAVAILABLE"]
 
@@ -129,6 +132,18 @@ class ReplanResult(BaseModel):
     affected_elements: list[str] = Field(default_factory=list)
 
 
+class CritiqueIssue(BaseModel):
+    severity: Literal["high", "medium", "low"] = Field(description="Issue severity")
+    day: Optional[str] = Field(default=None, description="Date or day reference, e.g. '2026-11-10'")
+    description: str = Field(description="Clear description of the issue")
+
+
+class CritiqueResult(BaseModel):
+    verdict: Literal["approve", "revise"] = Field(description="Whether the itinerary passes or needs revision")
+    issues: list[CritiqueIssue] = Field(default_factory=list, description="List of issues found")
+    revision_instructions: str = Field(default="", description="Specific instructions for the itinerary agent to fix the issues")
+
+
 class CleanHotelCard(BaseModel):
     name: str = Field(description="Exact real hotel/resort name, e.g. 'Spice Village - CGH Earth' or 'The Elephant Court'")
     area: str = Field(description="Specific neighborhood or landmark, e.g. 'Kumily, near Periyar Tiger Reserve Entrance'")
@@ -204,6 +219,7 @@ class DiscoveryState(TypedDict, total=False):
 class TripState(TypedDict, total=False):
     trip_id: str
     thread_id: str
+    execution_plan: dict[str, Any]
     request: dict[str, Any]
     selected_destination: Optional[str]
     destination_candidates: list[dict]
@@ -211,9 +227,12 @@ class TripState(TypedDict, total=False):
     events: list[dict]
     places: list[dict]
     flights: list[dict]
+    trains: list[dict]
     hotels: list[dict]
     itinerary: list[dict]
     validation: dict
+    revision_count: int
+    critique_history: list[dict]
     budget_breakdown: dict
     recommendations: list[str]
     travel_insights: dict
@@ -602,6 +621,176 @@ def _run_discovery(origin: str, month: str, year: int = 2026, days: int = 5, int
 # FLOW 1: ITINERARY MULTI-AGENT GRAPH
 # =====================================================================
 
+# ── Planner: ExecutionPlan schema & node ──────────────────────────────
+
+class ExecutionPlan(BaseModel):
+    include_flights: bool = Field(default=True, description="Whether to run the flights agent")
+    include_trains: bool = Field(default=True, description="Whether to run the trains agent")
+    include_events: bool = Field(default=True, description="Whether to run the events agent")
+    include_places: bool = Field(default=True, description="Whether to run the places agent")
+    include_hotels: bool = Field(default=True, description="Whether to run the hotels agent")
+    include_travel_insights: bool = Field(default=True, description="Whether to run the travel insights agent")
+    primary_transport: Literal["train", "flight", "road", "none"] = Field(default="flight", description="Primary transport mode")
+    reasoning: str = Field(default="", description="1-2 sentence explanation of the plan")
+
+
+# ── Deterministic helpers ─────────────────────────────────────────────
+
+_INDIAN_INDICATORS = {
+    "india", "delhi", "mumbai", "bangalore", "bengaluru", "chennai", "kolkata",
+    "hyderabad", "pune", "jaipur", "lucknow", "ahmedabad", "goa", "kochi",
+    "thiruvananthapuram", "bhubaneswar", "chandigarh", "shimla", "manali",
+    "rishikesh", "varanasi", "agra", "udaipur", "jodhpur", "amritsar",
+    "darjeeling", "gangtok", "shillong", "guwahati", "srinagar", "leh",
+    "ladakh", "kashmir", "kerala", "rajasthan", "uttarakhand", "himachal",
+    "tamil nadu", "karnataka", "maharashtra", "west bengal", "odisha",
+    "madhya pradesh", "gujarat", "andhra pradesh", "telangana", "assam",
+    "meghalaya", "sikkim", "nagaland", "manipur", "tripura", "mizoram",
+    "arunachal pradesh", "jharkhand", "chhattisgarh", "bihar", "haryana",
+    "punjab", "thekkady", "munnar", "alleppey", "coorg", "ooty", "kodaikanal",
+    "pondicherry", "puducherry", "madurai", "mysore", "hampi", "ranthambore",
+    "khajuraho", "ajanta", "ellora", "konark", "puri",
+}
+
+
+def _is_likely_indian(place: str) -> bool:
+    """Heuristic: returns True if the place name matches a known Indian city/state/region."""
+    tokens = set(place.lower().replace(",", " ").split())
+    return bool(tokens & _INDIAN_INDICATORS)
+
+
+def _is_international(origin: str, destination: str) -> bool:
+    """True when the destination appears to be outside India."""
+    if not destination:
+        return False
+    # If origin is Indian but destination is not recognized as Indian → international
+    if _is_likely_indian(origin) and not _is_likely_indian(destination):
+        return True
+    return False
+
+
+def build_fallback_plan(req: TripRequest, destination: str | None) -> dict:
+    """Rule-based deterministic fallback when Gemini is unavailable."""
+    plan = {
+        "include_flights": True,
+        "include_trains": True,
+        "include_events": True,
+        "include_places": True,
+        "include_hotels": True,
+        "include_travel_insights": True,
+        "primary_transport": "flight",
+        "reasoning": "Deterministic fallback: including all agents by default.",
+    }
+
+    dest = destination or ""
+    origin = req.origin or ""
+    prefs_lower = [p.lower() for p in (req.transportation_preferences or [])]
+
+    # Same-city → skip both transport agents
+    if origin.strip().lower() == dest.strip().lower() and origin.strip():
+        plan["include_flights"] = False
+        plan["include_trains"] = False
+        plan["primary_transport"] = "none"
+        plan["reasoning"] = "Origin and destination are the same city; no inter-city transport needed."
+        return plan
+
+    # International or non-Indian destination → skip trains
+    if _is_international(origin, dest) or (dest and not _is_likely_indian(dest)):
+        plan["include_trains"] = False
+        plan["primary_transport"] = "flight"
+        plan["reasoning"] = f"Destination '{dest}' appears international; trains excluded."
+
+    # Respect explicit user transport preferences
+    if prefs_lower:
+        if "train" in prefs_lower and "flight" not in prefs_lower:
+            plan["include_flights"] = False
+            plan["primary_transport"] = "train"
+        elif "flight" in prefs_lower and "train" not in prefs_lower:
+            plan["include_trains"] = False
+            plan["primary_transport"] = "flight"
+        elif "road" in prefs_lower and "train" not in prefs_lower and "flight" not in prefs_lower:
+            plan["include_flights"] = False
+            plan["include_trains"] = False
+            plan["primary_transport"] = "road"
+        if plan["reasoning"].startswith("Deterministic fallback"):
+            plan["reasoning"] = f"Deterministic fallback respecting user transport preferences: {', '.join(prefs_lower)}."
+
+    return plan
+
+
+def _apply_safety_overrides(plan: dict, req: TripRequest, destination: str | None) -> dict:
+    """Deterministic safety overrides applied AFTER LLM or fallback plan."""
+    dest = destination or ""
+    prefs_lower = [p.lower() for p in (req.transportation_preferences or [])]
+
+    # Override 1: user-stated transport preferences always win
+    if prefs_lower:
+        if "train" in prefs_lower:
+            plan["include_trains"] = True
+        if "flight" in prefs_lower:
+            plan["include_flights"] = True
+        if "train" in prefs_lower and "flight" not in prefs_lower:
+            plan["include_flights"] = False
+            plan["primary_transport"] = "train"
+        elif "flight" in prefs_lower and "train" not in prefs_lower:
+            plan["include_trains"] = False
+            plan["primary_transport"] = "flight"
+
+    # Override 2: never include trains for clearly non-Indian destinations
+    if dest and not _is_likely_indian(dest):
+        plan["include_trains"] = False
+        if plan["primary_transport"] == "train":
+            plan["primary_transport"] = "flight"
+
+    return plan
+
+
+def planner(state: TripState):
+    """Planner agent: uses LLM to decide which downstream agents to run."""
+    logger.info("agent=planner status=started")
+    print("[PLANNER AGENT: ExecutionPlanner] Deciding which agents to activate...")
+    req = TripRequest.model_validate(state["request"])
+    destination = state.get("selected_destination") or req.destination or ""
+
+    prompt = (
+        f"You are the Execution Planner for a travel planning pipeline. "
+        f"Decide which downstream agents should run for this trip request.\n"
+        f"Origin: {req.origin}\nDestination: {destination}\n"
+        f"Dates: {req.start_date} to {req.end_date}\nTravelers: {req.travelers}\n"
+        f"Budget: {req.budget} {req.currency}\n"
+        f"Transport preferences: {req.transportation_preferences}\n"
+        f"Interests: {req.interests}\n\n"
+        f"Rules:\n"
+        f"- If origin == destination, skip flights and trains.\n"
+        f"- If the destination is outside India, skip trains (Indian Railways only).\n"
+        f"- If the user prefers road travel only, skip flights and trains.\n"
+        f"- Include events and places unless the user's interests clearly don't need them.\n"
+        f"- Include hotels unless this is a day-trip (same start and end date with origin == destination).\n"
+        f"- Include travel_insights for multi-day trips to new destinations.\n"
+        f"- Set primary_transport to the best mode for this route.\n"
+        f"- Provide 1-2 sentences of reasoning.\n"
+    )
+
+    llm_plan = gemini.structured(prompt, ExecutionPlan)
+
+    if llm_plan:
+        plan = llm_plan.model_dump()
+        logger.info("agent=planner source=llm plan=%s", plan)
+    else:
+        plan = build_fallback_plan(req, destination)
+        logger.info("agent=planner source=fallback plan=%s", plan)
+
+    plan = _apply_safety_overrides(plan, req, destination)
+    logger.info("agent=planner final_plan=%s", plan)
+    print(f"[PLANNER] Plan: {plan['reasoning']}")
+    print(f"[PLANNER]   flights={plan['include_flights']} trains={plan['include_trains']} "
+          f"events={plan['include_events']} places={plan['include_places']} "
+          f"hotels={plan['include_hotels']} insights={plan['include_travel_insights']} "
+          f"transport={plan['primary_transport']}")
+
+    return {"execution_plan": plan, **done(f"Planner: {plan['reasoning']}")}
+
+
 def normalize(state: TripState):
     logger.info("agent=normalize status=started")
     print("\n[PLANNER AGENT 1/11: Normalizer] Reading trip parameters...")
@@ -645,6 +834,11 @@ def weather(state: TripState):
 
 def events(state: TripState):
     logger.info("agent=events status=started")
+    ep = state.get("execution_plan") or {}
+    if not ep.get("include_events", True):
+        reason = ep.get("reasoning", "excluded by planner")
+        print(f"[EventsAgent] ⏭️ Skipped: {reason}")
+        return {"events": [], **done(f"Skipped events: {reason}")}
     print("[PLANNER AGENT 3/11: EventsAgent] Verifying official events & festivals...")
     req, destination = TripRequest.model_validate(state["request"]), state.get("selected_destination")
     if not destination:
@@ -656,6 +850,11 @@ def events(state: TripState):
 
 def places(state: TripState):
     logger.info("agent=places status=started")
+    ep = state.get("execution_plan") or {}
+    if not ep.get("include_places", True):
+        reason = ep.get("reasoning", "excluded by planner")
+        print(f"[PlacesAgent] ⏭️ Skipped: {reason}")
+        return {"places": [], **done(f"Skipped places: {reason}")}
     print("[PLANNER AGENT 4/11: PlacesAgent] Researching top visitor attractions...")
     req, destination = TripRequest.model_validate(state["request"]), state.get("selected_destination")
     if not destination:
@@ -667,6 +866,11 @@ def places(state: TripState):
 
 
 def flights(state: TripState):
+    ep = state.get("execution_plan") or {}
+    if not ep.get("include_flights", True):
+        reason = ep.get("reasoning", "excluded by planner")
+        print(f"[FlightAgent] ⏭️ Skipped: {reason}")
+        return {"flights": [], **done(f"Skipped flights: {reason}")}
     req = TripRequest.model_validate(state["request"])
     destination = state.get("selected_destination")
     if not destination:
@@ -681,9 +885,42 @@ def flights(state: TripState):
     return {"flights": result, **done("Searching flights")}
 
 
+def trains(state: TripState):
+    ep = state.get("execution_plan") or {}
+    if not ep.get("include_trains", True):
+        reason = ep.get("reasoning", "excluded by planner")
+        print(f"[TrainAgent] ⏭️ Skipped: {reason}")
+        return {"trains": [], **done(f"Skipped trains: {reason}")}
+    req = TripRequest.model_validate(state["request"])
+    destination = state.get("selected_destination")
+    if not destination:
+        return {"trains": [unavailable("RapidAPI", "Select a destination first")], **done("Searching trains")}
+    
+    logger.info("agent=trains provider=RapidAPI status=started origin=%s destination=%s", req.origin, destination)
+    
+    result = search_trains(req.origin, destination, str(req.start_date), limit=5)
+    
+    if isinstance(result, str):
+        logger.warning("agent=trains provider=RapidAPI status=unavailable reason=%s", result.splitlines()[0])
+        return {"trains": [{"status": "UNAVAILABLE", "source": "RapidAPI", "fetched_at": now(), "message": result}], **done("Searching trains")}
+    
+    # Force LIVE status for the UI
+    for train in result:
+        train["status"] = "LIVE"
+        train["source"] = "IRCTC (RapidAPI)"
+        
+    return {"trains": result, **done("Searching live trains")}
+
+
+
 def hotels(state: TripState):
     """HotelAgent: Extracts REAL hotel/resort names, accurate pricing, and booking links."""
     logger.info("agent=hotels status=started")
+    ep = state.get("execution_plan") or {}
+    if not ep.get("include_hotels", True):
+        reason = ep.get("reasoning", "excluded by planner")
+        print(f"[HotelAgent] ⏭️ Skipped: {reason}")
+        return {"hotels": [], **done(f"Skipped hotels: {reason}")}
     req, destination = TripRequest.model_validate(state["request"]), state.get("selected_destination")
     if not destination:
         return {"hotels": [], **done("Searching hotels")}
@@ -763,23 +1000,42 @@ def _fallback_hotel_synthesis(destination: str, accommodation_type: str, sources
 def itinerary(state: TripState):
     """7. ItineraryAgent: Builds conservative, evidence-backed daily itinerary."""
     logger.info("agent=itinerary status=started")
-    print("[PLANNER AGENT 7/11: ItineraryAgent] Gemini synthesizing day-by-day structured itinerary...")
+    rev = state.get("revision_count", 0)
+    print(f"[PLANNER AGENT 7/11: ItineraryAgent] Gemini synthesizing itinerary (revision {rev})...")
     req = TripRequest.model_validate(state["request"])
     if not state.get("selected_destination") and not req.selected_destinations:
-        return {"itinerary": [], "warnings": ["Select a destination before itinerary planning."], **done("Building itinerary")}
+        return {"itinerary": [], "revision_count": MAX_REVISIONS, "warnings": ["Select a destination before itinerary planning."], **done("Building itinerary")}
     evidence = {"places": state.get("places", []), "weather": state.get("weather", {}), "events": state.get("events", [])}
-    prompt = (
+
+    # Build base prompt
+    base_prompt = (
         f"Create a conservative, realistic day-by-day travel itinerary using ONLY this evidence. "
         f"Never invent prices, opening hours, travel times, booking requirements, events, or fake routes. "
         f"Use UNAVAILABLE for missing cost data. Respect dates, pace, walking limits, and food preferences. "
         f"If multiple destinations are selected ({req.selected_destinations}), arrange a logical multi-stop route. "
         f"TRIP={req.model_dump_json()} EVIDENCE={json.dumps(evidence)}"
     )
+
+    # If this is a revision pass, append the critic's instructions
+    critique_entries = state.get("critique_history", [])
+    if critique_entries and rev > 0:
+        latest = critique_entries[-1]
+        revision_block = (
+            f"\n\nREVISION PASS {rev}: The previous itinerary was rejected by the critic.\n"
+            f"Issues found: {json.dumps(latest.get('issues', []))}\n"
+            f"Revision instructions: {latest.get('revision_instructions', 'Fix the issues listed above.')}\n"
+            f"Previous itinerary for reference: {json.dumps(state.get('itinerary', []))}\n"
+            f"Fix ALL listed issues while keeping the rest of the plan intact."
+        )
+        prompt = base_prompt + revision_block
+    else:
+        prompt = base_prompt
+
     plan = gemini.structured(prompt, ItineraryDraft)
     if not plan or not plan.activities:
         print("[ITINERARY] Using dynamic structured fallback itinerary...")
-        return {"itinerary": _fallback_itinerary(req), **done("Building itinerary")}
-    return {"itinerary": [item.model_dump() for item in plan.activities], **done("Building itinerary")}
+        return {"itinerary": _fallback_itinerary(req), "revision_count": MAX_REVISIONS, **done("Building itinerary")}
+    return {"itinerary": [item.model_dump() for item in plan.activities], "revision_count": rev + 1, **done("Building itinerary")}
 
 
 def _fallback_itinerary(req: TripRequest) -> list[dict]:
@@ -804,6 +1060,144 @@ def validate(state: TripState):
     return {"validation": {"valid": not issues, "issues": issues, "status": "VERIFIED", "checked_at": now()}, **done("Validating plan")}
 
 
+def _deterministic_critique(itinerary: list[dict], req: TripRequest) -> list[dict]:
+    """Layer (a): Pure deterministic checks — no LLM calls."""
+    issues = []
+    sd, ed = str(req.start_date), str(req.end_date)
+
+    # Group activities by day for overlap & density checks
+    by_day: dict[str, list[dict]] = {}
+    for act in itinerary:
+        d = act.get("date", "")
+        by_day.setdefault(d, []).append(act)
+
+        # Check 1: date outside trip range
+        if d and not (sd <= d <= ed):
+            issues.append({"severity": "high", "day": d,
+                           "description": f"Activity '{act.get('title', '?')}' on {d} is outside trip dates {sd}..{ed}."})
+
+    # Check 2: overlapping time slots on the same day
+    def _minutes(t: str) -> int | None:
+        try:
+            parts = t.strip().split(":")
+            return int(parts[0]) * 60 + int(parts[1])
+        except Exception:
+            return None
+
+    for day, acts in by_day.items():
+        timed = []
+        for a in acts:
+            s, e = _minutes(a.get("start_time", "")), _minutes(a.get("end_time", ""))
+            if s is not None and e is not None:
+                timed.append((s, e, a.get("title", "?")))
+        timed.sort()
+        for i in range(len(timed) - 1):
+            _, end_i, title_i = timed[i]
+            start_j, _, title_j = timed[i + 1]
+            if end_i > start_j:
+                issues.append({"severity": "high", "day": day,
+                               "description": f"Overlap: '{title_i}' ends after '{title_j}' starts on {day}."})
+
+        # Check 3: too many activities for relaxed pace
+        pace_limit = {"relaxed": 5, "balanced": 7, "fast": 10}.get(req.pace, 7)
+        if len(acts) > pace_limit:
+            issues.append({"severity": "medium", "day": day,
+                           "description": f"{len(acts)} activities on {day} exceeds {req.pace}-pace limit of {pace_limit}."})
+
+    # Check 4: days with zero activities
+    from datetime import timedelta
+    current = req.start_date
+    while current <= req.end_date:
+        ds = str(current)
+        if ds not in by_day or len(by_day[ds]) == 0:
+            issues.append({"severity": "medium", "day": ds,
+                           "description": f"No activities planned for {ds}."})
+        current += timedelta(days=1)
+
+    # Check 5: estimated costs exceed budget
+    if req.budget:
+        total_cost = sum(a.get("estimated_cost") or 0 for a in itinerary)
+        if total_cost > req.budget:
+            issues.append({"severity": "medium", "day": None,
+                           "description": f"Estimated activity cost {total_cost:,.0f} exceeds budget {req.budget:,.0f}."})
+
+    return issues
+
+
+def critic(state: TripState):
+    """Critic agent: deterministic checks + optional LLM quality review."""
+    logger.info("agent=critic status=started")
+    rev = state.get("revision_count", 0)
+    print(f"[CRITIC AGENT] Reviewing itinerary (revision_count={rev})...")
+
+    req = TripRequest.model_validate(state["request"])
+    itin = state.get("itinerary", [])
+
+    # Layer (a): deterministic checks
+    det_issues = _deterministic_critique(itin, req)
+    has_blocking = any(i["severity"] == "high" for i in det_issues)
+
+    # Layer (b): LLM critique — only if layer (a) found nothing blocking
+    llm_issues = []
+    if not has_blocking and itin:
+        destination = state.get("selected_destination") or ""
+        prompt = (
+            f"You are a travel itinerary critic. Review this itinerary for realism and quality.\n"
+            f"Trip: {req.origin} → {destination}, {req.start_date} to {req.end_date}, "
+            f"pace={req.pace}, interests={req.interests}\n"
+            f"Itinerary: {json.dumps(itin)}\n\n"
+            f"Check for: unrealistic travel times between stops, pace mismatch with user preference, "
+            f"key interests not covered, activities that don't exist at the destination.\n"
+            f"If the itinerary is good, set verdict='approve' with empty issues.\n"
+            f"If it needs fixes, set verdict='revise' with specific issues and revision_instructions."
+        )
+        llm_result = gemini.structured(prompt, CritiqueResult)
+        if llm_result:
+            llm_issues = [i.model_dump() for i in llm_result.issues]
+        # If gemini returns None, we skip layer (b) — never loop due to LLM unavailability
+
+    all_issues = det_issues + llm_issues
+    verdict = "revise" if all_issues else "approve"
+
+    # If at the revision cap, force approve regardless
+    if rev >= MAX_REVISIONS:
+        verdict = "approve"
+
+    revision_instructions = ""
+    if verdict == "revise":
+        descriptions = [i["description"] for i in all_issues]
+        revision_instructions = "Fix these issues: " + "; ".join(descriptions)
+
+    entry = {
+        "verdict": verdict,
+        "issues": all_issues,
+        "revision_instructions": revision_instructions,
+        "revision_pass": rev,
+        "checked_at": now(),
+    }
+
+    print(f"[CRITIC] verdict={verdict} issues={len(all_issues)} rev={rev}/{MAX_REVISIONS}")
+    for iss in all_issues:
+        print(f"[CRITIC]   [{iss['severity']}] {iss.get('day', '-')}: {iss['description']}")
+
+    history = list(state.get("critique_history", []))
+    history.append(entry)
+
+    return {"critique_history": history, **done(f"Critic: {verdict} ({len(all_issues)} issues)")}
+
+
+def _critic_router(state: TripState) -> str:
+    """Conditional edge: route back to itinerary for revision, or forward to budget."""
+    history = state.get("critique_history", [])
+    rev = state.get("revision_count", 0)
+    if history:
+        latest = history[-1]
+        if latest.get("verdict") == "revise" and rev < MAX_REVISIONS:
+            logger.info("critic_router: sending back to itinerary (rev=%d)", rev)
+            return "itinerary"
+    return "budget"
+
+
 def budget(state: TripState):
     logger.info("agent=budget status=started")
     print("[PLANNER AGENT 9/11: BudgetAgent] Calculating itemized cost breakdown...")
@@ -824,6 +1218,11 @@ def recommendations(state: TripState):
 def travel_insights(state: TripState):
     """Travel Video Insights & Tips Summarizer Agent: Synthesizes video transcripts, creator blogs & reviews into structured travel insights."""
     logger.info("agent=travel_insights status=started")
+    ep = state.get("execution_plan") or {}
+    if not ep.get("include_travel_insights", True):
+        reason = ep.get("reasoning", "excluded by planner")
+        print(f"[TravelInsightsAgent] ⏭️ Skipped: {reason}")
+        return {"travel_insights": {}, **done(f"Skipped travel_insights: {reason}")}
     destination = state.get("selected_destination")
     if not destination:
         return {"travel_insights": {}, **done("Synthesizing creator insights")}
@@ -895,13 +1294,15 @@ def finish(state: TripState):
 
 
 graph = StateGraph(TripState)
-for name, fn in [("normalize", normalize), ("discovery", discovery), ("weather", weather), ("events", events), ("places", places), ("flights", flights), ("hotels", hotels), ("itinerary", itinerary), ("validate", validate), ("budget", budget), ("recommendations", recommendations), ("travel_insights", travel_insights), ("finish", finish)]:
+for name, fn in [("normalize", normalize), ("discovery", discovery), ("planner", planner), ("weather", weather), ("events", events), ("places", places), ("flights", flights), ("trains", trains), ("hotels", hotels), ("itinerary", itinerary), ("validate", validate), ("critic", critic), ("budget", budget), ("recommendations", recommendations), ("travel_insights", travel_insights), ("finish", finish)]:
     graph.add_node(name, fn)
-graph.add_edge(START, "normalize"); graph.add_edge("normalize", "discovery")
-graph.add_edge("discovery", "weather"); graph.add_edge("discovery", "events"); graph.add_edge("discovery", "places")
+graph.add_edge(START, "normalize"); graph.add_edge("normalize", "discovery"); graph.add_edge("discovery", "planner")
+graph.add_edge("planner", "weather"); graph.add_edge("planner", "events"); graph.add_edge("planner", "places")
 graph.add_edge("weather", "flights"); graph.add_edge("events", "flights"); graph.add_edge("places", "flights")
-graph.add_edge("flights", "hotels"); graph.add_edge("hotels", "itinerary"); graph.add_edge("itinerary", "validate")
-graph.add_edge("validate", "budget"); graph.add_edge("budget", "recommendations"); graph.add_edge("recommendations", "travel_insights"); graph.add_edge("travel_insights", "finish"); graph.add_edge("finish", END)
+graph.add_edge("flights", "trains"); graph.add_edge("trains", "hotels"); graph.add_edge("hotels", "itinerary"); graph.add_edge("itinerary", "validate")
+graph.add_edge("validate", "critic")
+graph.add_conditional_edges("critic", _critic_router, {"itinerary": "itinerary", "budget": "budget"})
+graph.add_edge("budget", "recommendations"); graph.add_edge("recommendations", "travel_insights"); graph.add_edge("travel_insights", "finish"); graph.add_edge("finish", END)
 travel_graph = graph.compile()
 
 
