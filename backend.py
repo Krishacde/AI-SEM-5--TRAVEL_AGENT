@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from tools.tavily_tool import tavily_search
 from tools.flight_tool import search_flights
-from tools.train_tool import search_trains
+from tools.train_tool import resolve_station_candidates, search_trains
 
 load_dotenv()
 
@@ -626,14 +626,35 @@ def _is_likely_indian(place: str) -> bool:
     return bool(tokens & _INDIAN_INDICATORS)
 
 
-def _is_international(origin: str, destination: str) -> bool:
-    """True when the destination appears to be outside India."""
-    if not destination:
+def _destination_is_outside_india(place: str) -> bool:
+    """Return True only when the destination is positively identified as foreign."""
+    if not place or _is_likely_indian(place):
         return False
-    # If origin is Indian but destination is not recognized as Indian → international
-    if _is_likely_indian(origin) and not _is_likely_indian(destination):
-        return True
-    return False
+    if resolve_station_candidates(place):
+        return False
+
+    try:
+        response = requests.get(
+            "https://geocoding-api.open-meteo.com/v1/search",
+            params={"name": place.split(",")[0], "count": 1},
+            timeout=8,
+        )
+        response.raise_for_status()
+        result = (response.json().get("results") or [None])[0]
+    except (requests.exceptions.RequestException, ValueError, AttributeError, TypeError) as exc:
+        logger.warning("planner destination geocoding inconclusive place=%s error=%s", place, exc)
+        return False
+
+    country_code = result.get("country_code") if isinstance(result, dict) else None
+    if not isinstance(country_code, str) or not country_code.strip():
+        logger.warning("planner destination geocoding inconclusive place=%s", place)
+        return False
+    return country_code.upper() != "IN"
+
+
+def _is_international(origin: str, destination: str) -> bool:
+    """True only when geocoding or rail-station resolution confirms a foreign destination."""
+    return _destination_is_outside_india(destination)
 
 
 def build_fallback_plan(req: TripRequest, destination: str | None) -> dict:
@@ -661,8 +682,8 @@ def build_fallback_plan(req: TripRequest, destination: str | None) -> dict:
         plan["reasoning"] = "Origin and destination are the same city; no inter-city transport needed."
         return plan
 
-    # International or non-Indian destination → skip trains
-    if _is_international(origin, dest) or (dest and not _is_likely_indian(dest)):
+    # Skip trains only when the destination is positively identified as foreign.
+    if _is_international(origin, dest):
         plan["include_trains"] = False
         plan["primary_transport"] = "flight"
         plan["reasoning"] = f"Destination '{dest}' appears international; trains excluded."
@@ -703,8 +724,8 @@ def _apply_safety_overrides(plan: dict, req: TripRequest, destination: str | Non
             plan["include_trains"] = False
             plan["primary_transport"] = "flight"
 
-    # Override 2: never include trains for clearly non-Indian destinations
-    if dest and not _is_likely_indian(dest):
+    # Override 2: exclude trains only for positively identified foreign destinations.
+    if dest and _destination_is_outside_india(dest):
         plan["include_trains"] = False
         if plan["primary_transport"] == "train":
             plan["primary_transport"] = "flight"
@@ -861,20 +882,20 @@ def trains(state: TripState):
     req = TripRequest.model_validate(state["request"])
     destination = state.get("selected_destination")
     if not destination:
-        return {"trains": [unavailable("RapidAPI", "Select a destination first")], **done("Searching trains")}
+        return {"trains": [unavailable("RailRadar", "Select a destination first")], **done("Searching trains")}
     
-    logger.info("agent=trains provider=RapidAPI status=started origin=%s destination=%s", req.origin, destination)
+    logger.info("agent=trains provider=RailRadar status=started origin=%s destination=%s", req.origin, destination)
     
     result = search_trains(req.origin, destination, str(req.start_date), limit=5)
     
     if isinstance(result, str):
-        logger.warning("agent=trains provider=RapidAPI status=unavailable reason=%s", result.splitlines()[0])
-        return {"trains": [{"status": "UNAVAILABLE", "source": "RapidAPI", "fetched_at": now(), "message": result}], **done("Searching trains")}
+        logger.warning("agent=trains provider=RailRadar status=unavailable reason=%s", result.splitlines()[0])
+        return {"trains": [{"status": "UNAVAILABLE", "source": "RailRadar", "fetched_at": now(), "message": result}], **done("Searching trains")}
     
     # Force LIVE status for the UI
     for train in result:
         train["status"] = "LIVE"
-        train["source"] = "IRCTC (RapidAPI)"
+        train["source"] = "RailRadar"
         
     return {"trains": result, **done("Searching live trains")}
 

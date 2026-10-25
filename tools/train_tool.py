@@ -1,3 +1,4 @@
+import math
 import os
 import re
 
@@ -14,6 +15,18 @@ os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 # RailRadar API credentials
 RAILRADAR_API_KEY = os.getenv("RAILRADAR_API_KEY")
 RAILRADAR_BASE_URL = "https://api.railradar.in/v1/trains/between"
+
+# Approximate base fares from RailRadar's fare guide, accessed 2026-10-25:
+# https://railradar.in/fare. These exclude reservation fees and surcharges.
+RAIL_BASE_FARE_RATES_INR_PER_KM = {
+    "1A": 3.0,
+    "2A": 1.8,
+    "3A": 1.3,
+    "3E": 1.2,
+    "CC": 1.0,
+    "SL": 0.6,
+    "2S": 0.4,
+}
 
 CITY_TO_STATION_CODE = {
     "delhi": "NDLS",
@@ -65,6 +78,7 @@ CITY_TO_STATION_CODE = {
      "dwarka": "DWK",
     "okha": "OKHA",
      "udaipur": "UDZ",
+     "Mysuru":"MYS",
 }
 
 # ---------------------------------------------------------------------------
@@ -73,7 +87,7 @@ CITY_TO_STATION_CODE = {
 # as broad region names by the agent. All codes verified against IRCTC data.
 # ---------------------------------------------------------------------------
 REGION_TO_NEAREST_RAILHEAD = {
-    # Himachal Pradesh — state and main tourist destinations
+    # Himachal Pradesh
     "himachal pradesh": [("KLK", "Kalka"), ("UHL", "Una Himachal"), ("CDG", "Chandigarh")],
     "himachal":         [("KLK", "Kalka"), ("UHL", "Una Himachal"), ("CDG", "Chandigarh")],
     "shimla":           [("SML", "Shimla"), ("KLK", "Kalka")],
@@ -87,7 +101,8 @@ REGION_TO_NEAREST_RAILHEAD = {
     "spiti":            [("KLK", "Kalka"), ("CDG", "Chandigarh")],
     "kasauli":          [("KLK", "Kalka"), ("CDG", "Chandigarh")],
     "joginder nagar":   [("JDNX", "Joginder Nagar"), ("KLK", "Kalka")],
-    # Uttarakhand — state and main destinations
+    
+    # Uttarakhand
     "uttarakhand":      [("HW", "Haridwar"), ("DDN", "Dehradun")],
     "haridwar":         [("HW", "Haridwar")],
     "rishikesh":        [("HW", "Haridwar"), ("DDN", "Dehradun")],
@@ -99,26 +114,123 @@ REGION_TO_NEAREST_RAILHEAD = {
     "auli":             [("HW", "Haridwar"), ("DDN", "Dehradun")],
     "kedarnath":        [("HW", "Haridwar"), ("DDN", "Dehradun")],
     "badrinath":        [("HW", "Haridwar"), ("DDN", "Dehradun")],
-    # Jammu & Kashmir / Ladakh
-    "jammu kashmir":     [("JAT", "Jammu Tawi")],
-    "jammu and kashmir": [("JAT", "Jammu Tawi")],
-    "srinagar":          [("JAT", "Jammu Tawi")],
+    "valley of flowers":[("HW", "Haridwar"), ("DDN", "Dehradun")],
+    "lansdowne":        [("KTW", "Kotdwar")],
+    
+    # Jammu, Kashmir & Ladakh
+    "jammu kashmir":     [("JAT", "Jammu Tawi"), ("SVDK", "SMVD Katra")],
+    "jammu and kashmir": [("JAT", "Jammu Tawi"), ("SVDK", "SMVD Katra")],
+    "srinagar":          [("SINA", "Srinagar"), ("JAT", "Jammu Tawi")], # Udhampur-Srinagar line is getting active
     "gulmarg":           [("JAT", "Jammu Tawi")],
     "pahalgam":          [("JAT", "Jammu Tawi")],
     "sonamarg":          [("JAT", "Jammu Tawi")],
-    "leh":               [("JAT", "Jammu Tawi")],
-    "ladakh":            [("JAT", "Jammu Tawi")],
-    # Rajasthan destinations without a direct main-line station
+    "leh":               [("JAT", "Jammu Tawi"), ("CDG", "Chandigarh")],
+    "ladakh":            [("JAT", "Jammu Tawi"), ("CDG", "Chandigarh")],
+    "katra":             [("SVDK", "SMVD Katra")],
+    "vaishno devi":      [("SVDK", "SMVD Katra")],
+
+    # Rajasthan
+    "rajasthan":         [("JP", "Jaipur"), ("UDZ", "Udaipur"), ("JU", "Jodhpur")],
     "mount abu":         [("ABR", "Abu Road")],
     "ranthambore":       [("SWM", "Sawai Madhopur")],
-    # Northeast
+    "pushkar":           [("AII", "Ajmer Jn")],
+    "jaisalmer":         [("JSM", "Jaisalmer"), ("JU", "Jodhpur")],
+    "bikaner":           [("BKN", "Bikaner")],
+    "udaipur":           [("UDZ", "Udaipur")],
+    
+    # Gujarat
+    "kutch":             [("BHUJ", "Bhuj"), ("GIMB", "Gandhidham")],
+    "rann of kutch":     [("BHUJ", "Bhuj"), ("GIMB", "Gandhidham")],
+    "gir":               [("JND", "Junagadh"), ("VRL", "Veraval")],
+    "statue of unity":   [("EKNR", "Ekta Nagar"), ("BRC", "Vadodara")],
+    "somnath":           [("SMNH", "Somnath"), ("VRL", "Veraval")],
+    "dwarka":            [("DWK", "Dwarka")],
+    
+    # Maharashtra
+    "mahabaleshwar":     [("WTR", "Wathar"), ("PUNE", "Pune")],
+    "panchgani":         [("WTR", "Wathar"), ("PUNE", "Pune")],
+    "lonavala":          [("LNL", "Lonavala"), ("PUNE", "Pune")],
+    "khandala":          [("LNL", "Lonavala")],
+    "matheran":          [("NRL", "Neral")],
+    "ajanta ellora":     [("AWB", "Aurangabad"), ("JL", "Jalgaon")],
+    "aurangabad":        [("AWB", "Aurangabad")],
+    "shirdi":            [("SNSI", "Sainagar Shirdi"), ("MMR", "Manmad")],
+    "tadoba":            [("CD", "Chandrapur"), ("NGP", "Nagpur")],
+    
+    # Goa
+    "goa":               [("MAO", "Madgaon"), ("THVM", "Thivim")],
+    "north goa":         [("THVM", "Thivim"), ("KRMI", "Karmali")],
+    "south goa":         [("MAO", "Madgaon"), ("VSG", "Vasco Da Gama")],
+    "dudhsagar":         [("QLM", "Kulem"), ("MAO", "Madgaon")],
+    
+    # Karnataka
+    "coorg":             [("MYS", "Mysuru")],
+    "madikeri":          [("MYS", "Mysuru")],
+    "hampi":             [("HPT", "Hosapete")],
+    "gokarna":           [("GOK", "Gokarna Road"), ("KT", "Kumta")],
+    "chikmagalur":       [("CMGR", "Chikkamagaluru"), ("HAS", "Hassan")],
+    "bandipur":          [("MYS", "Mysuru")],
+    "kabini":            [("MYS", "Mysuru")],
+    "dandeli":           [("LWR", "Alnavar"), ("UBL", "Hubballi")],
+    "udupi":             [("UD", "Udupi")],
+    
+    # Kerala
+    "kerala":            [("ERN", "Ernakulam"), ("TVC", "Trivandrum")],
+    "munnar":            [("AWY", "Aluva"), ("ERN", "Ernakulam")],
+    "wayanad":           [("CLT", "Kozhikode")],
+    "alleppey":          [("ALLP", "Alappuzha"), ("ERN", "Ernakulam")],
+    "kumarakom":         [("KTYM", "Kottayam")],
+    "thekkady":          [("KTYM", "Kottayam")],
+    "varkala":           [("VAK", "Varkala Sivagiri"), ("TVC", "Trivandrum")],
+    "kovalam":           [("TVC", "Trivandrum")],
+    "kochi":             [("ERN", "Ernakulam")],
+    
+    # Tamil Nadu
+    "ooty":              [("UAM", "Udagamandalam"), ("CBE", "Coimbatore")],
+    "kodaikanal":        [("KQN", "Kodaikanal Road"), ("MDU", "Madurai")],
+    "mahabalipuram":     [("CGL", "Chengalpattu"), ("MAS", "Chennai")],
+    "pondicherry":       [("PDY", "Puducherry"), ("VM", "Villupuram")], # UT geographically in TN
+    "rameswaram":        [("RMM", "Rameswaram"), ("MDU", "Madurai")],
+    "kanyakumari":       [("CAPE", "Kanyakumari"), ("NCJ", "Nagercoil")],
+    "mudumalai":         [("CBE", "Coimbatore"), ("MYS", "Mysuru")],
+    "yercaud":           [("SA", "Salem")],
+    
+    # Madhya Pradesh & Chhattisgarh
+    "khajuraho":         [("KURJ", "Khajuraho"), ("MCSC", "MCRS Chhatarpur")],
+    "bandhavgarh":       [("UMR", "Umaria"), ("KTE", "Katni")],
+    "kanha":             [("G", "Gondia"), ("JBP", "Jabalpur")],
+    "pench":             [("NGP", "Nagpur")],
+    "pachmarhi":         [("PPI", "Pipariya")],
+    "ujjain":            [("UJN", "Ujjain")],
+    "orchha":            [("VGLJ", "VGL Jhansi")],
+    
+    # Uttar Pradesh & Bihar
+    "taj mahal":         [("AGC", "Agra Cantt"), ("AF", "Agra Fort")],
+    "agra":              [("AGC", "Agra Cantt"), ("AF", "Agra Fort")],
+    "varanasi":          [("BSB", "Varanasi"), ("DDU", "Pt. DD Upadhyaya")],
+    "kashi":             [("BSB", "Varanasi")],
+    "ayodhya":           [("AY", "Ayodhya Dham"), ("AYC", "Ayodhya Cantt")],
+    "mathura":           [("MTJ", "Mathura")],
+    "vrindavan":         [("MTJ", "Mathura")],
+    "bodh gaya":         [("GAYA", "Gaya")],
+    
+    # West Bengal & Odisha
+    "darjeeling":        [("NJP", "New Jalpaiguri")],
+    "sundarbans":        [("CAN", "Canning"), ("SDAH", "Sealdah")],
+    "digha":             [("DGHA", "Digha")],
+    "puri":              [("PURI", "Puri"), ("BBS", "Bhubaneswar")],
+    "konark":            [("PURI", "Puri"), ("BBS", "Bhubaneswar")],
+    
+    # Northeast (Meghalaya, Sikkim, Assam, Arunachal)
     "meghalaya":         [("GHY", "Guwahati")],
     "shillong":          [("GHY", "Guwahati")],
+    "cherrapunji":       [("GHY", "Guwahati")],
     "arunachal pradesh": [("NTSK", "Naharlagun"), ("GHY", "Guwahati")],
-    "sikkim":            [("NJP", "New Jalpaiguri"), ("GHY", "Guwahati")],
+    "tawang":            [("TZTB", "Tezpur"), ("GHY", "Guwahati")],
+    "sikkim":            [("NJP", "New Jalpaiguri")],
     "gangtok":           [("NJP", "New Jalpaiguri")],
-    "darjeeling":        [("NJP", "New Jalpaiguri")],
-    
+    "kaziranga":         [("FKG", "Furkating"), ("GHY", "Guwahati")],
+    "majuli":            [("JTTN", "Jorhat Town")]
 }
 
 
@@ -154,6 +266,59 @@ def _minutes_to_duration(minutes) -> str:
     if not isinstance(minutes, int):
         return str(minutes)
     return f"{minutes // 60}h {minutes % 60}m"
+
+
+def _distance_to_km(distance) -> float | None:
+    if isinstance(distance, bool) or distance is None:
+        return None
+    try:
+        parsed = float(distance)
+    except (TypeError, ValueError):
+        match = re.search(r"\d+(?:\.\d+)?", str(distance))
+        if not match:
+            return None
+        parsed = float(match.group())
+    return parsed if math.isfinite(parsed) and parsed > 0 else None
+
+
+def _fare_class_for_train(train_type: str | None) -> str | None:
+    kind = (train_type or "").lower().replace("-", " ")
+    if any(token in kind for token in ("rajdhani", "duronto")):
+        return "3A"
+    if any(token in kind for token in ("shatabdi", "vande bharat")):
+        return "CC"
+    if any(token in kind for token in ("passenger", "local")):
+        return "2S"
+    if any(token in kind for token in ("express", "superfast", "mail")):
+        return "SL"
+    return None
+
+
+def _train_price_fields(train_type: str | None, distance_km: float | None) -> dict:
+    price_class = _fare_class_for_train(train_type)
+    if distance_km is None or price_class is None:
+        return {
+            "price_num": None,
+            "price": None,
+            "price_class": price_class,
+            "price_status": "UNAVAILABLE",
+        }
+
+    price_num = int(round(distance_km * RAIL_BASE_FARE_RATES_INR_PER_KM[price_class]))
+    if price_num <= 0:
+        return {
+            "price_num": None,
+            "price": None,
+            "price_class": price_class,
+            "price_status": "UNAVAILABLE",
+        }
+    return {
+        "price_num": price_num,
+        "price": f"₹{price_num:,}",
+        "price_class": price_class,
+        "price_status": "ESTIMATED",
+        "price_note": "Estimate excludes reservation fees and superfast surcharges.",
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -280,7 +445,7 @@ def _fetch_between(
     date: str,
     by_city: bool = False,
     limit: int = 10,
-) -> list:
+) -> tuple[list, str | None]:
     """
     Call RailRadar GET /v1/trains/between/{from}/{to} and return a list of
     result dicts in the canonical shape expected by search_trains() / format_train().
@@ -294,10 +459,11 @@ def _fetch_between(
                           NZM, ANVT automatically). Use for ordinary single-station cities.
         limit:            Max number of results to return from this single call.
 
-    Returns [] on any error or 404/NOT_FOUND — caller handles messaging.
+    Returns (trains, error); an empty train list without an error means the
+    request succeeded but no trains were found.
     """
     if not RAILRADAR_API_KEY:
-        return []
+        return [], "Train search unavailable: RailRadar API key is missing."
 
     url = f"{RAILRADAR_BASE_URL}/{origin_code}/{destination_code}"
     headers = {"Authorization": f"Bearer {RAILRADAR_API_KEY}"}
@@ -308,30 +474,59 @@ def _fetch_between(
 
     try:
         response = requests.get(url, headers=headers, params=params, timeout=30)
-        # Treat 404 as a clean "no trains" rather than a crash
-        if response.status_code == 404:
-            return []
-        response.raise_for_status()
-        data = response.json()
+    except requests.exceptions.Timeout:
+        return [], "Network/timeout error while contacting RailRadar: request timed out."
     except requests.exceptions.RequestException:
-        return []
+        return [], "Network/timeout error while contacting RailRadar."
+
+    if response.status_code in (401, 403):
+        reason = "Unauthorized" if response.status_code == 401 else "Forbidden"
+        return [], f"RailRadar rejected the API key (HTTP {response.status_code} {reason})."
+    if response.status_code == 429:
+        return [], "RailRadar rate limit reached (HTTP 429)."
+    if response.status_code >= 500:
+        return [], f"RailRadar upstream error (HTTP {response.status_code})."
+    if response.status_code >= 400:
+        return [], f"RailRadar upstream error (HTTP {response.status_code})."
+
+    try:
+        data = response.json()
     except ValueError:
-        return []
+        return [], "RailRadar upstream error: response was not valid JSON."
 
-    if not data.get("success"):
-        return []
+    if not isinstance(data, dict) or not data.get("success"):
+        return [], "RailRadar upstream error: response did not contain successful train data."
 
-    trains_payload = data.get("data", {}).get("trains", [])
-    from_info = data.get("data", {}).get("from", {})
-    to_info   = data.get("data", {}).get("to", {})
+    response_data = data.get("data") or {}
+    if not isinstance(response_data, dict):
+        return [], "RailRadar upstream error: train data had an unexpected format."
+    trains_payload = response_data.get("trains", [])
+    if not isinstance(trains_payload, list):
+        return [], "RailRadar upstream error: train results had an unexpected format."
+    from_info = response_data.get("from", {})
+    to_info = response_data.get("to", {})
+    if not isinstance(from_info, dict) or not isinstance(to_info, dict):
+        return [], "RailRadar upstream error: station data had an unexpected format."
+    if any(not isinstance(item, dict) for item in trains_payload):
+        return [], "RailRadar upstream error: a train result had an unexpected format."
 
     results = []
     for item in trains_payload[:limit]:
         train_info = item.get("train", {})
         from_sched = item.get("from", {})
         to_sched   = item.get("to", {})
-
-        results.append({
+        duration_value = item.get("duration")
+        try:
+            duration_mins = (
+                int(duration_value)
+                if not isinstance(duration_value, bool) and str(duration_value).isdigit()
+                else None
+            )
+        except (TypeError, ValueError):
+            duration_mins = None
+        distance_km = _distance_to_km(item.get("distance"))
+        train_type = train_info.get("type")
+        result = {
             "train_name":             train_info.get("name", "Unknown Train"),
             "train_number":           train_info.get("number", "N/A"),
             "departure_station":      from_info.get("name", origin_code),
@@ -340,13 +535,20 @@ def _fetch_between(
             "arrival_station_code":   to_info.get("code", destination_code),
             "departure_time":         from_sched.get("departure", "N/A"),
             "arrival_time":           to_sched.get("arrival", "N/A"),
-            "duration":               _minutes_to_duration(item.get("duration")),
+            "duration":               _minutes_to_duration(
+                duration_mins if duration_mins is not None else duration_value
+            ),
+            "duration_mins":          duration_mins,
+            "train_type":             train_type,
+            "run_days":               train_info.get("runDays"),
+            "distance_km":            distance_km,
             "available_classes":      [],   # not provided by this endpoint
-            "starting_fare":          None, # not provided by this endpoint
             "status":                 "Scheduled",
-        })
+        }
+        result.update(_train_price_fields(train_type, distance_km))
+        results.append(result)
 
-    return results
+    return results, None
 
 
 def format_train(train: dict):
@@ -378,7 +580,7 @@ Route:
 def search_trains(origin: str, destination: str, date: str, limit: int = 5):
     if not RAILRADAR_API_KEY:
         return (
-            "Train API error: RAILRADAR_API_KEY is missing.\n"
+            "Train search unavailable: RailRadar API key is missing (RAILRADAR_API_KEY).\n"
             "Please add it in your .env file:\n"
             "RAILRADAR_API_KEY=your_railradar_api_key_here"
         )
@@ -399,6 +601,11 @@ def search_trains(origin: str, destination: str, date: str, limit: int = 5):
             "Try a nearby city with rail access (e.g. the nearest major junction)."
         )
 
+    region_candidates = _lookup_region_railheads(normalize_location_text(destination))
+    destination_uses_region_railheads = (
+        bool(region_candidates) and destination_candidates == region_candidates
+    )
+
     # -----------------------------------------------------------------------
     # Step 3 — Geography-aware calling logic
     #
@@ -409,9 +616,8 @@ def search_trains(origin: str, destination: str, date: str, limit: int = 5):
     #              byCity on just one would not find the others)
     # -----------------------------------------------------------------------
 
-    # Build the list of (origin_code, dest_code, by_city) call pairs to try,
-    # capped at MAX_CALLS to protect the 1,000-req/month free tier.
-    MAX_CALLS = 4
+    # Build the list of (origin_code, dest_code, by_city) call pairs to try.
+    MAX_CALLS = 6
     call_pairs = []
 
     if len(origin_candidates) == 1 and len(destination_candidates) == 1:
@@ -444,33 +650,59 @@ def search_trains(origin: str, destination: str, date: str, limit: int = 5):
             if len(call_pairs) >= MAX_CALLS:
                 break
 
-    # Execute call pairs; stop as soon as results are found (quota-conserving)
+    # Search every candidate pair so regional destinations are fully covered.
     all_results = []
-    seen_numbers = set()
+    seen_routes = set()
+    errors = []
     calls_made = 0
 
     for o_code, d_code, by_city in call_pairs:
-        batch = _fetch_between(o_code, d_code, date, by_city=by_city, limit=limit)
+        batch, error = _fetch_between(o_code, d_code, date, by_city=by_city, limit=limit)
         calls_made += 1
+        if error:
+            errors.append(error)
         for train in batch:
-            num = train.get("train_number")
-            if num not in seen_numbers:
-                seen_numbers.add(num)
+            route_key = (
+                str(train.get("train_number") or "").strip(),
+                str(train.get("departure_station_code") or "").strip().upper(),
+                str(train.get("arrival_station_code") or "").strip().upper(),
+            )
+            if route_key not in seen_routes:
+                seen_routes.add(route_key)
+                if destination_uses_region_railheads and (
+                    train.get("arrival_station") or ""
+                ).strip().casefold() != destination.strip().casefold():
+                    train["rail_ends_note"] = (
+                        f"Rail ends at {train.get('arrival_station')}; "
+                        f"continue by road to {destination}"
+                    )
                 all_results.append(train)
-        if all_results:
-            # Results found — stop here to conserve monthly quota
-            break
 
     if not all_results:
+        if errors:
+            priority = (
+                "rejected the API key",
+                "rate limit reached",
+                "Network/timeout error",
+                "upstream error",
+            )
+            for category in priority:
+                matching = next((error for error in errors if category in error), None)
+                if matching:
+                    return matching
+            return errors[0]
         return (
-            f"No trains found between '{origin}' and '{destination}' after checking "
-            f"{calls_made} station combination(s) on {date}. "
-            "Metro-area expansion (for cities) and alternate regional railheads "
-            "(for broad regions) were both already tried."
+            f"RailRadar returned no trains between '{origin}' and '{destination}' "
+            f"on {date} after successfully checking {calls_made} station combination(s)."
         )
 
-    # Sort by duration (shortest first), trim to requested limit
-    all_results.sort(key=lambda t: t.get("duration", ""))
+    # Sort by numeric duration (shortest first), trim to requested limit.
+    all_results.sort(
+        key=lambda train: (
+            train.get("duration_mins") is None,
+            train.get("duration_mins") if train.get("duration_mins") is not None else 0,
+        )
+    )
     return all_results[:limit]
 
 

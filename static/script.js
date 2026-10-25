@@ -54,6 +54,13 @@ function parseCurrencyNum(val) {
   return Number(clean) || 0;
 }
 
+function sameTrainOption(a, b) {
+  return Boolean(a && b
+    && a.train_number === b.train_number
+    && a.departure_station_code === b.departure_station_code
+    && a.arrival_station_code === b.arrival_station_code);
+}
+
 function buildTripViewModel(payload, response) {
   const dest = payload.destination || (payload.selected_destinations?.join(", ")) || "Selected Destination";
   
@@ -92,35 +99,6 @@ function buildTripViewModel(payload, response) {
       price: "₹8,200",
       price_num: 8200,
       cabin: "Premium Economy · Meal Included",
-      status: "ESTIMATED"
-    }
-  ];
-
-  const fallbackTrains = [
-    {
-      train_name: "Rajdhani Express",
-      train_number: "12951",
-      departure_station: "New Delhi",
-      arrival_station: dest,
-      departure_time: "16:55",
-      arrival_time: "08:35",
-      duration: "15h 40m",
-      available_classes: ["3AC", "2AC", "1AC"],
-      price: "₹1,850",
-      price_num: 1850,
-      status: "ESTIMATED"
-    },
-    {
-      train_name: "Shatabdi Express",
-      train_number: "12006",
-      departure_station: "New Delhi",
-      arrival_station: dest,
-      departure_time: "07:15",
-      arrival_time: "12:40",
-      duration: "5h 25m",
-      available_classes: ["CC", "EC", "2S"],
-      price: "₹980",
-      price_num: 980,
       status: "ESTIMATED"
     }
   ];
@@ -183,15 +161,12 @@ function buildTripViewModel(payload, response) {
       ...f,
       price_num: parseCurrencyNum(f.price || f.estimated_cost) || (6500 + i * 1200)
     })) : fallbackFlights,
-    trains: (response.trains && response.trains.length > 0)
-      ? response.trains.map(t => {
-          const numPrice = typeof t.price === 'number' ? t.price : parseCurrencyNum(t.price);
-          return {
-            ...t,
-            price_num: numPrice,
-            price: typeof t.price === 'number' ? `₹${t.price.toLocaleString("en-IN")}` : (t.price || null)
-          };
-        })
+    trains: Array.isArray(response.trains)
+      ? response.trains.map(t => ({
+          ...t,
+          price_num: t.price_num,
+          price_status: t.price_status
+        }))
       : [],
     hotels: (response.hotels && response.hotels.length > 0) ? response.hotels.map((h, i) => ({
       ...h,
@@ -249,15 +224,16 @@ function toggleTrainSelection(index) {
   if (!latestTrip) return;
   const train = latestTrip.trains[index];
   
-  if (selectedTrain && selectedTrain.train_number === train.train_number) {
+  if (sameTrainOption(selectedTrain, train)) {
     selectedTrain = null;
     latestTrip.itinerary_items = latestTrip.itinerary_items.filter(act => !act.is_train_entry);
     showToast("Train removed from itinerary.");
   } else {
     selectedTrain = train;
     latestTrip.itinerary_items = latestTrip.itinerary_items.filter(act => !act.is_train_entry);
-    
+
     const depDate = latestTrip.request.start_date;
+    const trainPrice = Number.isFinite(train.price_num) ? train.price_num : null;
     const classesText = Array.isArray(train.available_classes) && train.available_classes.length > 0 
       ? train.available_classes.join(" · ") 
       : (train.available_classes || "AC / Sleeper");
@@ -271,8 +247,10 @@ function toggleTrainSelection(index) {
       description: `Confirmed rail booking. Classes available: ${classesText}. Duration: ${train.duration || "On schedule"}.`,
       reason: "Confirmed Rail Booking",
       status: "VERIFIED",
-      cost: train.price_num || parseCurrencyNum(train.price),
-      cost_text: train.price || `₹${train.price_num}`,
+      cost: trainPrice ?? 0,
+      cost_text: trainPrice === null
+        ? "Fare unavailable"
+        : (train.price || `₹${trainPrice.toLocaleString("en-IN")}`),
       is_train_entry: true
     });
     
@@ -478,10 +456,14 @@ function renderTrainCards(trains) {
   return `
     <div class="cards">
       ${trains.map((t, i) => {
-        const isChosen = selectedTrain && selectedTrain.train_number === t.train_number;
+        const isChosen = sameTrainOption(selectedTrain, t);
         const classesText = Array.isArray(t.available_classes) && t.available_classes.length > 0 
           ? t.available_classes.join(" · ") 
           : (t.available_classes || "");
+        const priceAvailable = Number.isFinite(t.price_num);
+        const priceDisplay = priceAvailable
+          ? (t.price || `₹${t.price_num.toLocaleString("en-IN")}`)
+          : "Fare unavailable";
 
         return `
           <article class="data-card provider-card ${isChosen ? 'is-selected-card' : ''}">
@@ -507,10 +489,13 @@ function renderTrainCards(trains) {
               </div>
             </div>
             ${classesText ? `<div class="card-section"><span class="travel-text">🧳 ${esc(classesText)}</span></div>` : ""}
+            ${t.rail_ends_note ? `<div class="card-section"><span class="travel-text">${esc(t.rail_ends_note)}</span></div>` : ""}
+            ${t.price_note ? `<div class="card-section"><span class="travel-text">${esc(t.price_note)}</span></div>` : ""}
             <div class="card-action-row provider-action-row">
               <div class="price-block">
-                <span class="price-val">${esc(t.price || `₹${t.price_num}`)}</span>
-                <small>/ person</small>
+                <span class="price-val">${esc(priceDisplay)}</span>
+                <small>${priceAvailable ? `/ person${t.price_class ? ` · ${esc(t.price_class)}` : ""}` : (t.price_class ? `Class ${esc(t.price_class)}` : "")}</small>
+                ${t.price_status === "ESTIMATED" ? `<span class="status-badge">Estimated</span>` : ""}
               </div>
               <button class="primary ${isChosen ? 'added-btn' : ''}" type="button" onclick="toggleTrainSelection(${i})">
                 ${isChosen ? '✓ In Itinerary' : '+ Add to Itinerary'}
@@ -604,7 +589,7 @@ function renderCabCards(cabs) {
 
 function renderBudgetBreakdown(trip) {
   const flightCost = selectedFlight ? (selectedFlight.price_num || parseCurrencyNum(selectedFlight.price)) : 0;
-  const trainCost = selectedTrain ? (selectedTrain.price_num || parseCurrencyNum(selectedTrain.price)) : 0;
+  const trainCost = selectedTrain && Number.isFinite(selectedTrain.price_num) ? selectedTrain.price_num : 0;
   const hotelCost = selectedHotel ? (selectedHotel.total_num || parseCurrencyNum(selectedHotel.total_price)) : 0;
   const cabCost = selectedCab ? (selectedCab.price_num || parseCurrencyNum(selectedCab.price)) : 0;
   
