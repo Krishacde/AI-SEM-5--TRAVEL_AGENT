@@ -4,6 +4,8 @@ import logging
 import os
 import re
 import sys
+import contextvars
+import threading
 import uuid
 from datetime import date, datetime, timezone
 from typing import Annotated, Any, Literal, Optional, TypedDict
@@ -24,7 +26,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from tools.tavily_tool import tavily_search
 from tools.flight_tool import search_flights
-from tools.train_tool import resolve_station_candidates, search_trains
+from tools.train_tool import find_alternate_dates, resolve_station_candidates, search_trains
 
 load_dotenv()
 
@@ -54,6 +56,20 @@ os.environ.setdefault("REQUESTS_CA_BUNDLE", certifi.where())
 MAX_REVISIONS = 2  # Hard cap on itinerary revision loops (Gemini free-tier quota is limited)
 
 DataStatus = Literal["LIVE", "VERIFIED", "ESTIMATED", "AI_RECOMMENDATION", "USER_PROVIDED", "CREATOR_REPORTED", "UNAVAILABLE"]
+
+request_cancel_event: contextvars.ContextVar[threading.Event | None] = contextvars.ContextVar(
+    "request_cancel_event", default=None
+)
+
+
+class RequestCancelled(Exception):
+    """Raised between agent/provider calls when the browser cancels a request."""
+
+
+def raise_if_cancelled() -> None:
+    event = request_cancel_event.get()
+    if event and event.is_set():
+        raise RequestCancelled("Request cancelled by the client.")
 
 
 # =====================================================================
@@ -180,6 +196,7 @@ class DiscoveryState(TypedDict, total=False):
     origin: str
     month: str
     year: int
+    days: int
     interests: list[str]
     mood: Optional[str]
     weather_preference: Optional[str]
@@ -329,9 +346,11 @@ gemini = GeminiService()
 
 
 def research(query: str, limit: int = 6) -> tuple[list[dict], list[str]]:
+    raise_if_cancelled()
     logger.info("agent=research status=started query='%s'", query)
     print(f"[TAVILY SEARCH] Query: '{query}' (limit={limit})")
     result = tavily_search(query, limit)
+    raise_if_cancelled()
     if not result["success"]:
         logger.warning("agent=research provider=Tavily status=failed error=%s", result["error"])
         print(f"[TAVILY SEARCH] ❌ Failed: {result.get('error')}")
@@ -350,15 +369,16 @@ def research(query: str, limit: int = 6) -> tuple[list[dict], list[str]]:
 def agent_nearby_destinations(state: DiscoveryState) -> dict:
     origin = state["origin"]
     month = state.get("month", "this month")
+    days = state.get("days", 5)
     interests = state.get("interests", [])
     interest_str = f" for {', '.join(interests)}" if interests else ""
     
     logger.info("agent=NearbyDestinationAgent origin=%s month=%s", origin, month)
     print(f"\n[AGENT 1/5: NearbyDestinationAgent] Scouting getaways near '{origin}' for {month}...")
-    query = f"top travel destinations weekend getaways from {origin} to visit in {month} India{interest_str} tourism"
+    query = f"top travel destinations from {origin} for a {days}-day trip to visit in {month} India{interest_str} tourism"
     sources, warnings = research(query, limit=8)
     
-    query_regional = f"places to visit near {origin} {month} weather attractions"
+    query_regional = f"places to visit near {origin} within a {days}-day itinerary {month} weather attractions"
     sources_reg, _ = research(query_regional, limit=5)
     all_sources = sources + sources_reg
     
@@ -407,10 +427,11 @@ def agent_weather(state: DiscoveryState) -> dict:
 def agent_destination_research(state: DiscoveryState) -> dict:
     origin = state["origin"]
     month = state.get("month", "August")
+    days = state.get("days", 5)
     
     logger.info("agent=DestinationResearchAgent origin=%s", origin)
     print(f"[AGENT 4/5: DestinationResearchAgent] Checking connectivity & travel times from '{origin}'...")
-    query = f"best things to do road trips train connectivity travel times from {origin} {month}"
+    query = f"best things to do road trips train connectivity travel times from {origin} in a {days}-day trip {month}"
     sources, warnings = research(query, limit=6)
     
     return {
@@ -425,6 +446,7 @@ def agent_destination_ranking(state: DiscoveryState) -> dict:
     origin = state["origin"]
     month = state.get("month", "August")
     year = state.get("year", datetime.now().year)
+    days = state.get("days", 5)
     interests = state.get("interests", [])
     
     logger.info("agent=DestinationRankingAgent synthesizing clean cards for origin=%s", origin)
@@ -434,6 +456,7 @@ def agent_destination_ranking(state: DiscoveryState) -> dict:
         "origin": origin,
         "month": month,
         "year": year,
+        "days": days,
         "interests": interests,
         "raw_candidates_count": len(state.get("candidates_raw", [])),
         "raw_candidate_snippets": [s.get("snippet", "") for s in state.get("candidates_raw", [])[:10]],
@@ -445,7 +468,7 @@ def agent_destination_ranking(state: DiscoveryState) -> dict:
     
     prompt = f"""
 You are the Destination Ranking Agent for TripMate AI.
-Your goal is to recommend 5 to 8 CLEAN, CONCISE DESTINATION CARDS for a traveler starting from "{origin}" in "{month} {year}".
+Your goal is to recommend 5 to 8 CLEAN, CONCISE DESTINATION CARDS for a traveler starting from "{origin}" in "{month} {year}" with exactly {days} total trip days, including travel from and back to the starting location.
 
 STRICT RULES:
 1. NO RAW SEARCH DUMPS: Do not output article titles ("15 Best...", "Travel Guide..."), long paragraphs, or search snippets.
@@ -454,7 +477,8 @@ STRICT RULES:
    - For 'special_this_month': ONLY include an event/festival if it genuinely takes place in {month} for the year {year}.
    - If no specific event is verified, leave 'special_this_month' as None or mention a seasonal natural highlight (e.g. 'Lush green monsoon scenery'). Set 'special_is_verified' to True only if year-specific evidence exists.
 4. GEOGRAPHIC ACCURACY: Find realistic, accessible destinations starting from {origin}.
-5. STATUS & SOURCE: Attach status ('VERIFIED' or 'AI_RECOMMENDATION') and real source attribution.
+5. STRICT DURATION FIT: Recommend ONLY destinations that can realistically be visited within exactly {days} total days, including round-trip travel, arrival, departure, and the listed attractions. Do not suggest a destination if its travel time or required minimum stay makes this impossible. Prefer closer destinations for shorter trips. Make every 'travel_time' and attraction list consistent with this limit.
+6. STATUS & SOURCE: Attach status ('VERIFIED' or 'AI_RECOMMENDATION') and real source attribution.
 
 GATHERED EVIDENCE:
 {json.dumps(gathered_evidence)}
@@ -468,7 +492,7 @@ GATHERED EVIDENCE:
     else:
         logger.warning("agent=DestinationRankingAgent dynamic fallback_synthesis invoked")
         print(f"[DISCOVERY] Synthesizing clean cards dynamically from search evidence for '{origin}'...")
-        cards = _fallback_discovery_synthesis(origin, month, year, interests, state.get("sources", []))
+        cards = _fallback_discovery_synthesis(origin, month, year, days, interests, state.get("sources", []))
         summary = f"Curated {len(cards)} top destinations accessible from {origin} for {month} {year}."
 
     print(f"[DISCOVERY] ✓ Finished: Generated {len(cards)} destination recommendation cards")
@@ -479,7 +503,7 @@ GATHERED EVIDENCE:
     }
 
 
-def _fallback_discovery_synthesis(origin: str, month: str, year: int, interests: list[str], sources: list[dict]) -> list[dict]:
+def _fallback_discovery_synthesis(origin: str, month: str, year: int, days: int, interests: list[str], sources: list[dict]) -> list[dict]:
     """Dynamically parses and synthesizes clean destination cards from live search evidence for ANY origin."""
     extracted_names = []
     
@@ -522,11 +546,11 @@ def _fallback_discovery_synthesis(origin: str, month: str, year: int, interests:
             "name": name,
             "region": f"Accessible from {origin}",
             "match_score": max(75, base_score - (idx * 3)),
-            "why_visit": f"Ideal getaway from {origin} featuring seasonal highlights and scenic experiences in {month} {year}.",
+            "why_visit": f"A realistic {days}-day getaway from {origin} featuring seasonal highlights and scenic experiences in {month} {year}.",
             "special_this_month": f"Seasonal climate & local festivities for {month}",
             "special_is_verified": False,
             "best_for": (interests if interests else ["Nature", "Culture", "Relaxation"])[:3],
-            "travel_time": f"Drive or regional transit ~{2 + idx}–{4 + idx} hrs from {origin}",
+            "travel_time": f"Drive or regional transit ~{min(2 + idx, max(1, days * 2 - 2))}–{min(4 + idx, max(2, days * 3 - 2))} hrs from {origin}; fits a {days}-day trip",
             "estimated_budget": f"₹{12000 + idx * 3000:,}–₹{22000 + idx * 4000:,} / person",
             "key_attractions": [f"Iconic highlights of {name}", "Scenic viewpoints", "Regional cultural heritage"],
             "weather_summary": f"Pleasant seasonal weather for {month}",
@@ -556,15 +580,24 @@ disc_graph.add_edge("ranking_agent", END)
 discovery_graph = disc_graph.compile()
 
 
-def run_discovery(origin: str, month: str, year: int = 2026, interests: list[str] = None, mood: str = None) -> dict:
-    logger.info("discovery_started origin=%s month=%s year=%s", origin, month, year)
+def run_discovery(origin: str, month: str, year: int = 2026, days: int = 5, interests: list[str] = None, mood: str = None, cancellation_event: threading.Event | None = None) -> dict:
+    token = request_cancel_event.set(cancellation_event)
+    try:
+        return _run_discovery(origin, month, year, days, interests, mood)
+    finally:
+        request_cancel_event.reset(token)
+
+
+def _run_discovery(origin: str, month: str, year: int = 2026, days: int = 5, interests: list[str] = None, mood: str = None) -> dict:
+    logger.info("discovery_started origin=%s month=%s year=%s days=%s", origin, month, year, days)
     print(f"\n=======================================================")
-    print(f"🚀 [FLOW 2: DISCOVERY SCOUT] Starting for: '{origin}' ({month} {year})")
+    print(f"🚀 [FLOW 2: DISCOVERY SCOUT] Starting for: '{origin}' ({month} {year}, {days} days)")
     print(f"=======================================================")
     initial_state = {
         "origin": origin,
         "month": month,
         "year": year,
+        "days": days,
         "interests": interests or [],
         "mood": mood or "Culture and Nature",
         "sources": [],
@@ -890,7 +923,19 @@ def trains(state: TripState):
     
     if isinstance(result, str):
         logger.warning("agent=trains provider=RailRadar status=unavailable reason=%s", result.splitlines()[0])
-        return {"trains": [{"status": "UNAVAILABLE", "source": "RailRadar", "fetched_at": now(), "message": result}], **done("Searching trains")}
+        alternate_dates = []
+        if "returned no trains" in result:
+            alternate_dates = find_alternate_dates(
+                req.origin, destination, str(req.start_date)
+            )
+        return {"trains": [{
+            "status": "UNAVAILABLE",
+            "source": "RailRadar",
+            "fetched_at": now(),
+            "message": result,
+            "date": str(req.start_date),
+            "alternate_dates": alternate_dates,
+        }], **done("Searching trains")}
     
     # Force LIVE status for the UI
     for train in result:
@@ -1294,7 +1339,15 @@ graph.add_edge("budget", "recommendations"); graph.add_edge("recommendations", "
 travel_graph = graph.compile()
 
 
-def run_trip(request_data: dict[str, Any], thread_id: str | None = None) -> dict:
+def run_trip(request_data: dict[str, Any], thread_id: str | None = None, cancellation_event: threading.Event | None = None) -> dict:
+    token = request_cancel_event.set(cancellation_event)
+    try:
+        return _run_trip(request_data, thread_id)
+    finally:
+        request_cancel_event.reset(token)
+
+
+def _run_trip(request_data: dict[str, Any], thread_id: str | None = None) -> dict:
     req = TripRequest.model_validate(request_data)
     tid = thread_id or f"trip_{uuid.uuid4().hex}"
     dest_str = req.destination or (", ".join(req.selected_destinations) if req.selected_destinations else "auto")

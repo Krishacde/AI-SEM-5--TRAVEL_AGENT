@@ -51,11 +51,19 @@
             </select>
           </label>
           <label>
-            🗓️ Year
+            �️ Year
             <select id="discoverYear">
               <option value="2026" selected>2026</option>
               <option value="2027">2027</option>
             </select>
+          </label>
+          <label>
+            📅 Start date
+            <input id="discoverStartDate" type="date" required>
+          </label>
+          <label>
+            📅 End date
+            <input id="discoverEndDate" type="date" required>
           </label>
         </div>
 
@@ -95,9 +103,12 @@
           </div>
         </details>
 
-        <button class="primary" type="submit" id="discoverSubmitBtn">
-          Scout Destinations <span>→</span>
-        </button>
+        <div class="agent-action-row">
+          <button class="primary" type="submit" id="discoverSubmitBtn">
+            Scout Destinations <span>→</span>
+          </button>
+          <button class="cancel-btn hidden" type="button" id="discoverCancelBtn">Pause research</button>
+        </div>
       </form>
     </section>
 
@@ -151,6 +162,6 @@
     Gemini Reasoning · LangGraph Orchestration · Verified Evidence Pipeline
   </footer>
 
-  <script src="/static/discover.js"></script>
+  <script src="/static/discover.js?v=20260917"></script>
 </body>
 </html>

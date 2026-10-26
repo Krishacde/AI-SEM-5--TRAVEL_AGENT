@@ -1,4 +1,7 @@
 import sys
+import asyncio
+import threading
+import time
 import os
 from pathlib import Path
 
@@ -18,12 +21,18 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from backend import TripRequest, run_travel_agent, run_trip, run_discovery, replanning_agent
+from backend import RequestCancelled, TripRequest, run_travel_agent, run_trip, run_discovery, replanning_agent
 from tools.flight_tool import API_KEY as AVIATIONSTACK_API_KEY
 
 BASE_DIR = Path(__file__).resolve().parent
+
+# Edit these two values to tune the request limiter for local or hosted use.
+RATE_LIMIT_WINDOW_SECONDS = 60
+RATE_LIMIT_MAX_REQUESTS = 6
+_rate_limit_history: dict[str, list[float]] = {}
+_rate_limit_lock = threading.Lock()
 logger = logging.getLogger("tripmate.api")
 logger.setLevel(logging.INFO)
 log_formatter = logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s")
@@ -55,6 +64,37 @@ templates = Jinja2Templates(
 )
 
 
+def rate_limit_response(request: Request, bucket: str) -> JSONResponse | None:
+    client_key = f"{bucket}:{request.client.host if request.client else 'unknown'}"
+    now = time.monotonic()
+    with _rate_limit_lock:
+        recent = [stamp for stamp in _rate_limit_history.get(client_key, []) if now - stamp < RATE_LIMIT_WINDOW_SECONDS]
+        if len(recent) >= RATE_LIMIT_MAX_REQUESTS:
+            _rate_limit_history[client_key] = recent
+            return JSONResponse(
+                status_code=429,
+                content={"success": False, "error": "Too many requests. Please wait before starting another agent run."},
+                headers={"Retry-After": str(RATE_LIMIT_WINDOW_SECONDS)},
+            )
+        recent.append(now)
+        _rate_limit_history[client_key] = recent
+    return None
+
+
+async def run_cancellable(request: Request, operation, *args, **kwargs):
+    cancellation_event = threading.Event()
+    task = asyncio.create_task(asyncio.to_thread(operation, *args, cancellation_event=cancellation_event, **kwargs))
+    while not task.done():
+        await asyncio.wait({task}, timeout=0.25)
+        if await request.is_disconnected():
+            cancellation_event.set()
+            break
+    try:
+        return await task
+    except RequestCancelled:
+        raise
+
+
 class TravelRequest(BaseModel):
     message: str
     thread_id: str | None = None
@@ -74,6 +114,9 @@ class DiscoveryQueryRequest(BaseModel):
     origin: str
     month: str = "August"
     year: int = 2026
+    days: int = Field(default=5, ge=1, le=30)
+    start_date: str | None = None
+    end_date: str | None = None
     travelers: int = 1
     budget: float | None = None
     currency: str = "INR"
@@ -111,7 +154,10 @@ async def discover_page(request: Request):
 
 
 @app.post("/api/travel")
-async def travel_planner(request_data: TravelRequest):
+async def travel_planner(request: Request, request_data: TravelRequest):
+    limited = rate_limit_response(request, "travel")
+    if limited:
+        return limited
     try:
         user_message = request_data.message.strip()
         if not user_message:
@@ -171,13 +217,18 @@ async def select_provider(trip_id: str, request_data: ProviderSelectionRequest):
 
 
 @app.post("/api/trips")
-async def create_trip(request_data: GuidedTripRequest):
+async def create_trip(request: Request, request_data: GuidedTripRequest):
     """Run the evidence-first LangGraph planner with structured user choices."""
+    limited = rate_limit_response(request, "trip")
+    if limited:
+        return limited
     try:
         payload = request_data.model_dump(mode="json", exclude={"thread_id"})
         logger.info("request=trip_create status=started thread_id=%s destination=%s", request_data.thread_id or "new", payload.get("destination"))
-        trip = run_trip(payload, request_data.thread_id)
+        trip = await run_cancellable(request, run_trip, payload, request_data.thread_id)
         return JSONResponse(content={"success": True, "trip": trip})
+    except RequestCancelled:
+        return JSONResponse(status_code=499, content={"success": False, "cancelled": True, "error": "Trip research cancelled."})
     except Exception as exc:
         logger.exception("request=trip_create status=failed error=%s", exc)
         traceback.print_exc()
@@ -185,17 +236,21 @@ async def create_trip(request_data: GuidedTripRequest):
 
 
 @app.post("/api/discover")
-async def discover_destinations(request_data: DiscoveryQueryRequest):
+async def discover_destinations(request: Request, request_data: DiscoveryQueryRequest):
     """Run LangGraph Multi-Agent Discovery Pipeline to find clean, ranked destination cards."""
+    limited = rate_limit_response(request, "discover")
+    if limited:
+        return limited
     try:
         logger.info(
             "request=destination_discovery status=started origin=%s month=%s year=%s",
             request_data.origin, request_data.month, request_data.year
         )
-        discovery_result = run_discovery(
+        discovery_result = await run_cancellable(request, run_discovery,
             origin=request_data.origin.strip(),
             month=request_data.month.strip(),
             year=request_data.year,
+            days=request_data.days,
             interests=request_data.interests,
             mood=request_data.mood
         )
@@ -206,6 +261,8 @@ async def discover_destinations(request_data: DiscoveryQueryRequest):
             "progress": discovery_result["progress"],
             "warnings": discovery_result["warnings"]
         })
+    except RequestCancelled:
+        return JSONResponse(status_code=499, content={"success": False, "cancelled": True, "error": "Destination research cancelled."})
     except Exception as exc:
         logger.exception("request=destination_discovery status=failed error=%s", exc)
         traceback.print_exc()
@@ -213,8 +270,11 @@ async def discover_destinations(request_data: DiscoveryQueryRequest):
 
 
 @app.post("/api/trips/replan")
-async def replan_itinerary(request_data: ReplanPayload):
+async def replan_itinerary(request: Request, request_data: ReplanPayload):
     """Run ReplanningAgent to adjust itinerary based on user input without full regeneration."""
+    limited = rate_limit_response(request, "replan")
+    if limited:
+        return limited
     try:
         logger.info("request=trip_replan status=started trip_id=%s change=%s", request_data.trip_id, request_data.change_text)
         result = replanning_agent(

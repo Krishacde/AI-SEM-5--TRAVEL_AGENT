@@ -1,6 +1,13 @@
+import json
+import logging
 import math
 import os
 import re
+import threading
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta
+from functools import lru_cache
+from pathlib import Path
 
 import certifi
 import requests
@@ -15,6 +22,17 @@ os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 # RailRadar API credentials
 RAILRADAR_API_KEY = os.getenv("RAILRADAR_API_KEY")
 RAILRADAR_BASE_URL = "https://api.railradar.in/v1/trains/between"
+GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search"
+
+logger = logging.getLogger(__name__)
+
+_FETCH_CACHE_LOCK = threading.Lock()
+_FETCH_CACHE: dict[tuple[str, str, str, bool], Future] = {}
+_GEOCODE_CACHE: dict[str, tuple[float, float] | None] = {}
+_GEOCODE_CACHE_LOCK = threading.Lock()
+_RAILHEAD_CACHE: dict[str, list[tuple[str, str]]] = {}
+_RAILHEAD_DISTANCE_KM: dict[str, tuple[str, str, float]] = {}
+_RAILHEAD_CACHE_LOCK = threading.Lock()
 
 # Approximate base fares from RailRadar's fare guide, accessed 2026-10-25:
 # https://railradar.in/fare. These exclude reservation fees and surcharges.
@@ -87,6 +105,11 @@ CITY_TO_STATION_CODE = {
 # as broad region names by the agent. All codes verified against IRCTC data.
 # ---------------------------------------------------------------------------
 REGION_TO_NEAREST_RAILHEAD = {
+    "coorg":           [("MYS", "Mysuru")],
+    "kodagu":          [("MYS", "Mysuru")],
+    "madikeri":        [("MYS", "Mysuru")],
+    "kushalnagar":     [("MYS", "Mysuru")],
+    "virajpet":        [("MYS", "Mysuru")],
     # Himachal Pradesh
     "himachal pradesh": [("KLK", "Kalka"), ("UHL", "Una Himachal"), ("CDG", "Chandigarh")],
     "himachal":         [("KLK", "Kalka"), ("UHL", "Una Himachal"), ("CDG", "Chandigarh")],
@@ -108,7 +131,7 @@ REGION_TO_NEAREST_RAILHEAD = {
     "rishikesh":        [("HW", "Haridwar"), ("DDN", "Dehradun")],
     "dehradun":         [("DDN", "Dehradun")],
     "mussoorie":        [("DDN", "Dehradun")],
-    "nainital":         [("KTG", "Kathgodam"), ("MB", "Moradabad")],
+    "nainital":         [("KGM", "Kathgodam"), ("MB", "Moradabad")],
     "jim corbett":      [("RMR", "Ramnagar"), ("MB", "Moradabad")],
     "corbett":          [("RMR", "Ramnagar"), ("MB", "Moradabad")],
     "auli":             [("HW", "Haridwar"), ("DDN", "Dehradun")],
@@ -116,6 +139,7 @@ REGION_TO_NEAREST_RAILHEAD = {
     "badrinath":        [("HW", "Haridwar"), ("DDN", "Dehradun")],
     "valley of flowers":[("HW", "Haridwar"), ("DDN", "Dehradun")],
     "lansdowne":        [("KTW", "Kotdwar")],
+    "kainchi dham":     [("KGM", "Kathgodam"), ("HDW", "Haldwani")],
     
     # Jammu, Kashmir & Ladakh
     "jammu kashmir":     [("JAT", "Jammu Tawi"), ("SVDK", "SMVD Katra")],
@@ -390,6 +414,7 @@ def resolve_station_candidates(location: str) -> list:
       2. Exact / fuzzy match in CITY_TO_STATION_CODE
       3. Exact / fuzzy match in REGION_TO_NEAREST_RAILHEAD
       4. Segment-split (e.g. "Manali, Himachal Pradesh") — repeat 2+3 per segment
+      5. Geocoded nearest major railheads from the bundled station table
 
     Returns [] if nothing matched.
     """
@@ -432,12 +457,130 @@ def resolve_station_candidates(location: str) -> list:
     if hits:
         return hits
 
-    return []
+    return _nearest_railheads(raw)
 
 
 # ---------------------------------------------------------------------------
 # RailRadar API — fetch layer
 # ---------------------------------------------------------------------------
+
+def _geocode_indian_place(place: str) -> tuple[float, float] | None:
+    """Return cached Open-Meteo coordinates for an Indian place, or None."""
+    clean = normalize_location_text(place)
+    if not clean:
+        return None
+
+    with _GEOCODE_CACHE_LOCK:
+        if clean in _GEOCODE_CACHE:
+            return _GEOCODE_CACHE[clean]
+
+        coordinates = None
+        try:
+            response = requests.get(
+                GEOCODING_URL,
+                params={"name": clean, "count": 1},
+                timeout=8,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            results = payload.get("results") if isinstance(payload, dict) else None
+            result = results[0] if isinstance(results, list) and results else None
+            country_code = result.get("country_code") if isinstance(result, dict) else None
+            if isinstance(country_code, str) and country_code.upper() == "IN":
+                latitude = result.get("latitude")
+                longitude = result.get("longitude")
+                if (
+                    isinstance(latitude, (int, float))
+                    and not isinstance(latitude, bool)
+                    and isinstance(longitude, (int, float))
+                    and not isinstance(longitude, bool)
+                    and -90 <= latitude <= 90
+                    and -180 <= longitude <= 180
+                ):
+                    coordinates = (float(latitude), float(longitude))
+        except (
+            requests.exceptions.RequestException,
+            ValueError,
+            TypeError,
+            AttributeError,
+        ):
+            pass
+
+        _GEOCODE_CACHE[clean] = coordinates
+        return coordinates
+
+
+@lru_cache(maxsize=1)
+def _load_station_table() -> tuple[tuple[str, str, float, float], ...]:
+    station_path = Path(__file__).resolve().parents[1] / "data" / "stations.json"
+    with station_path.open(encoding="utf-8") as station_file:
+        records = json.load(station_file)
+    if not isinstance(records, list):
+        raise ValueError("Bundled railway station data must be a JSON array")
+
+    stations = []
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        code = record.get("code")
+        name = record.get("name")
+        latitude = record.get("lat")
+        longitude = record.get("lon")
+        if (
+            isinstance(code, str)
+            and isinstance(name, str)
+            and isinstance(latitude, (int, float))
+            and isinstance(longitude, (int, float))
+        ):
+            stations.append((code, name, float(latitude), float(longitude)))
+    return tuple(stations)
+
+
+def _haversine_km(latitude: float, longitude: float, station_lat: float, station_lon: float) -> float:
+    earth_radius_km = 6371.0
+    lat1 = math.radians(latitude)
+    lat2 = math.radians(station_lat)
+    delta_lat = lat2 - lat1
+    delta_lon = math.radians(station_lon - longitude)
+    haversine = (
+        math.sin(delta_lat / 2) ** 2
+        + math.cos(lat1) * math.cos(lat2) * math.sin(delta_lon / 2) ** 2
+    )
+    return 2 * earth_radius_km * math.asin(math.sqrt(haversine))
+
+
+def _nearest_railheads(place: str) -> list[tuple[str, str]]:
+    """Resolve an unknown Indian place to its three nearest major railheads."""
+    clean = normalize_location_text(place)
+    if not clean:
+        return []
+
+    with _RAILHEAD_CACHE_LOCK:
+        if clean in _RAILHEAD_CACHE:
+            return list(_RAILHEAD_CACHE[clean])
+
+    coordinates = _geocode_indian_place(clean)
+    if coordinates is None:
+        with _RAILHEAD_CACHE_LOCK:
+            _RAILHEAD_CACHE[clean] = []
+        return []
+
+    latitude, longitude = coordinates
+    ranked = sorted(
+        (
+            _haversine_km(latitude, longitude, station_lat, station_lon),
+            code,
+            name,
+        )
+        for code, name, station_lat, station_lon in _load_station_table()
+    )
+    nearest = [(code, name) for _, code, name in ranked[:3]]
+    with _RAILHEAD_CACHE_LOCK:
+        _RAILHEAD_CACHE[clean] = nearest
+        if ranked:
+            distance, code, name = ranked[0]
+            _RAILHEAD_DISTANCE_KM[clean] = (code, name, distance)
+    return list(nearest)
 
 def _fetch_between(
     origin_code: str,
@@ -551,6 +694,41 @@ def _fetch_between(
     return results, None
 
 
+def _cached_fetch_between(
+    origin_code: str,
+    destination_code: str,
+    date: str,
+    by_city: bool,
+    limit: int = 10,
+) -> tuple[list, str | None]:
+    """Cache one request per station pair, date, and city-expansion mode."""
+    key = (origin_code, destination_code, date, by_city)
+    with _FETCH_CACHE_LOCK:
+        future = _FETCH_CACHE.get(key)
+        owner = future is None
+        if owner:
+            future = Future()
+            _FETCH_CACHE[key] = future
+
+    if owner:
+        try:
+            future.set_result(
+                _fetch_between(
+                    origin_code,
+                    destination_code,
+                    date,
+                    by_city=by_city,
+                    limit=10,
+                )
+            )
+        except BaseException as exc:
+            future.set_exception(exc)
+            raise
+
+    trains, error = future.result()
+    return [dict(train) for train in trains[:limit]], error
+
+
 def format_train(train: dict):
     train_name = train.get("train_name") or "Unknown train"
     train_number = train.get("train_number") or "N/A"
@@ -577,6 +755,45 @@ Route:
 """.strip()
 
 
+def _station_call_pairs(origin_candidates: list, destination_candidates: list) -> list:
+    """Build the bounded station pairs used by regular and alternate searches."""
+    max_calls = 6
+    call_pairs = []
+    if len(origin_candidates) == 1 and len(destination_candidates) == 1:
+        call_pairs.append((origin_candidates[0][0], destination_candidates[0][0], True))
+    elif len(origin_candidates) == 1:
+        o_code = origin_candidates[0][0]
+        for d_code, _ in destination_candidates:
+            if len(call_pairs) >= max_calls:
+                break
+            call_pairs.append((o_code, d_code, False))
+    elif len(destination_candidates) == 1:
+        d_code = destination_candidates[0][0]
+        for o_code, _ in origin_candidates:
+            if len(call_pairs) >= max_calls:
+                break
+            call_pairs.append((o_code, d_code, False))
+    else:
+        for o_code, _ in origin_candidates:
+            for d_code, _ in destination_candidates:
+                if len(call_pairs) >= max_calls:
+                    break
+                call_pairs.append((o_code, d_code, False))
+            if len(call_pairs) >= max_calls:
+                break
+    return call_pairs
+
+
+def _sort_trains(trains: list) -> list:
+    trains.sort(
+        key=lambda train: (
+            train.get("duration_mins") is None,
+            train.get("duration_mins") if train.get("duration_mins") is not None else 0,
+        )
+    )
+    return trains
+
+
 def search_trains(origin: str, destination: str, date: str, limit: int = 5):
     if not RAILRADAR_API_KEY:
         return (
@@ -588,7 +805,6 @@ def search_trains(origin: str, destination: str, date: str, limit: int = 5):
     origin_candidates = resolve_station_candidates(origin)
     destination_candidates = resolve_station_candidates(destination)
 
-    # Report exactly which location(s) failed to resolve
     failed = []
     if not origin_candidates:
         failed.append(f"'{origin}'")
@@ -605,59 +821,17 @@ def search_trains(origin: str, destination: str, date: str, limit: int = 5):
     destination_uses_region_railheads = (
         bool(region_candidates) and destination_candidates == region_candidates
     )
+    call_pairs = _station_call_pairs(origin_candidates, destination_candidates)
 
-    # -----------------------------------------------------------------------
-    # Step 3 — Geography-aware calling logic
-    #
-    # len == 1  → ordinary single-station city  → 1 call, byCity=True
-    #             (RailRadar's metro-area expansion covers nearby stations)
-    # len >= 2  → region railhead fallback       → loop candidates, byCity=False
-    #             (Kalka / Una / Chandigarh are genuinely different cities;
-    #              byCity on just one would not find the others)
-    # -----------------------------------------------------------------------
-
-    # Build the list of (origin_code, dest_code, by_city) call pairs to try.
-    MAX_CALLS = 6
-    call_pairs = []
-
-    if len(origin_candidates) == 1 and len(destination_candidates) == 1:
-        # Common case: both sides are ordinary cities → single call, byCity=True
-        call_pairs.append((origin_candidates[0][0], destination_candidates[0][0], True))
-
-    elif len(origin_candidates) == 1:
-        # Origin is a single city; destination is a broad region
-        o_code = origin_candidates[0][0]
-        for d_code, _ in destination_candidates:
-            if len(call_pairs) >= MAX_CALLS:
-                break
-            call_pairs.append((o_code, d_code, False))
-
-    elif len(destination_candidates) == 1:
-        # Destination is a single city; origin is a broad region
-        d_code = destination_candidates[0][0]
-        for o_code, _ in origin_candidates:
-            if len(call_pairs) >= MAX_CALLS:
-                break
-            call_pairs.append((o_code, d_code, False))
-
-    else:
-        # Both sides are broad regions — try cross-product up to MAX_CALLS
-        for o_code, _ in origin_candidates:
-            for d_code, _ in destination_candidates:
-                if len(call_pairs) >= MAX_CALLS:
-                    break
-                call_pairs.append((o_code, d_code, False))
-            if len(call_pairs) >= MAX_CALLS:
-                break
-
-    # Search every candidate pair so regional destinations are fully covered.
     all_results = []
     seen_routes = set()
     errors = []
     calls_made = 0
 
     for o_code, d_code, by_city in call_pairs:
-        batch, error = _fetch_between(o_code, d_code, date, by_city=by_city, limit=limit)
+        batch, error = _cached_fetch_between(
+            o_code, d_code, date, by_city=by_city, limit=limit
+        )
         calls_made += 1
         if error:
             errors.append(error)
@@ -675,6 +849,16 @@ def search_trains(origin: str, destination: str, date: str, limit: int = 5):
                     train["rail_ends_note"] = (
                         f"Rail ends at {train.get('arrival_station')}; "
                         f"continue by road to {destination}"
+                    )
+                elif (
+                    (railhead := _RAILHEAD_DISTANCE_KM.get(
+                        normalize_location_text(destination)
+                    ))
+                    and train.get("arrival_station_code") == railhead[0]
+                ):
+                    train["rail_ends_note"] = (
+                        f"Rail ends at {railhead[1]}, about {round(railhead[2])} km "
+                        f"by road to {destination}"
                     )
                 all_results.append(train)
 
@@ -696,14 +880,87 @@ def search_trains(origin: str, destination: str, date: str, limit: int = 5):
             f"on {date} after successfully checking {calls_made} station combination(s)."
         )
 
-    # Sort by numeric duration (shortest first), trim to requested limit.
-    all_results.sort(
-        key=lambda train: (
-            train.get("duration_mins") is None,
-            train.get("duration_mins") if train.get("duration_mins") is not None else 0,
+    return _sort_trains(all_results)[:limit]
+
+
+def _search_alternate_day(
+    day: str,
+    call_pairs: list,
+) -> tuple[str, list]:
+    all_results = []
+    seen_routes = set()
+    errors = []
+    for origin_code, destination_code, by_city in call_pairs:
+        batch, error = _cached_fetch_between(
+            origin_code, destination_code, day, by_city=by_city, limit=10
         )
-    )
-    return all_results[:limit]
+        if error:
+            errors.append(error)
+        for train in batch:
+            route_key = (
+                str(train.get("train_number") or "").strip(),
+                str(train.get("departure_station_code") or "").strip().upper(),
+                str(train.get("arrival_station_code") or "").strip().upper(),
+            )
+            if route_key not in seen_routes:
+                seen_routes.add(route_key)
+                all_results.append(train)
+    if errors:
+        logger.warning(
+            "alternate train lookup failed date=%s reason=%s",
+            day,
+            errors[0].splitlines()[0],
+        )
+    return day, _sort_trains(all_results)
+
+
+def find_alternate_dates(
+    origin: str,
+    destination: str,
+    date: str,
+    days: int = 7,
+) -> list[dict]:
+    """Return dates with trains among the days after the requested date."""
+    if days <= 0 or not RAILRADAR_API_KEY:
+        return []
+
+    start_date = datetime.strptime(date, "%Y-%m-%d").date()
+    origin_candidates = resolve_station_candidates(origin)
+    destination_candidates = resolve_station_candidates(destination)
+    if not origin_candidates or not destination_candidates:
+        return []
+
+    call_pairs = _station_call_pairs(origin_candidates, destination_candidates)
+    dates = [start_date + timedelta(days=offset) for offset in range(1, days + 1)]
+    results_by_date = {}
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {
+            executor.submit(_search_alternate_day, day.isoformat(), call_pairs): day
+            for day in dates
+        }
+        for future in as_completed(futures):
+            day_string, trains = future.result()
+            results_by_date[day_string] = trains
+
+    alternates = []
+    for day in dates:
+        trains = results_by_date[day.isoformat()]
+        if trains:
+            alternates.append(
+                {
+                    "date": day.isoformat(),
+                    "weekday": day.strftime("%a"),
+                    "trains": [
+                        {
+                            "number": train.get("train_number"),
+                            "name": train.get("train_name"),
+                            "departure_time": train.get("departure_time"),
+                        }
+                        for train in trains
+                    ],
+                }
+            )
+    return alternates
 
 
 if __name__ == "__main__":

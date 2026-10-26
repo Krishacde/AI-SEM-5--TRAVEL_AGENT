@@ -1,0 +1,3548 @@
+[
+  {
+    "code": "ABKP",
+    "name": "AMBIKAPUR",
+    "lat": 23.137032,
+    "lon": 83.14510899999999
+  },
+  {
+    "code": "ADB",
+    "name": "ADILABAD",
+    "lat": 19.680104,
+    "lon": 78.535285
+  },
+  {
+    "code": "ADI",
+    "name": "AHMEDABAD JN",
+    "lat": 23.025515,
+    "lon": 72.601516
+  },
+  {
+    "code": "ADIJ",
+    "name": "AHMEDABAD JN",
+    "lat": 23.025715,
+    "lon": 72.60171600000001
+  },
+  {
+    "code": "ADRA",
+    "name": "ADRA JN",
+    "lat": 23.495992,
+    "lon": 86.67466499999999
+  },
+  {
+    "code": "AF",
+    "name": "AGRA FORT",
+    "lat": 27.183308,
+    "lon": 78.0191
+  },
+  {
+    "code": "AGC",
+    "name": "AGRA CANTT",
+    "lat": 27.157992,
+    "lon": 77.990153
+  },
+  {
+    "code": "AGTL",
+    "name": "Agartala",
+    "lat": 23.792417,
+    "lon": 91.278481
+  },
+  {
+    "code": "AH",
+    "name": "ACHHNERA JN",
+    "lat": 27.1817602284,
+    "lon": 77.7578389026
+  },
+  {
+    "code": "AII",
+    "name": "AJMER JN",
+    "lat": 26.456612,
+    "lon": 74.63746400000001
+  },
+  {
+    "code": "AIT",
+    "name": "AIT",
+    "lat": 25.903719000000002,
+    "lon": 79.230436
+  },
+  {
+    "code": "AJJ",
+    "name": "ARAKKONAM",
+    "lat": 13.081512,
+    "lon": 79.667991
+  },
+  {
+    "code": "AJJN",
+    "name": "ARAKKONAM JN NORTH",
+    "lat": 13.086445000000001,
+    "lon": 79.64842900000001
+  },
+  {
+    "code": "AJLE",
+    "name": "AZIMGANJ JN CABIN",
+    "lat": 24.23827,
+    "lon": 88.257363
+  },
+  {
+    "code": "AK",
+    "name": "AKOLA JN",
+    "lat": 20.723084,
+    "lon": 77.005497
+  },
+  {
+    "code": "AKV",
+    "name": "ANKLESHWAR JN",
+    "lat": 21.623889,
+    "lon": 73.000633
+  },
+  {
+    "code": "ALD",
+    "name": "ALLAHABAD JN",
+    "lat": 25.446241,
+    "lon": 81.828816
+  },
+  {
+    "code": "ALJN",
+    "name": "ALIGARH JN",
+    "lat": 27.889584,
+    "lon": 78.074559
+  },
+  {
+    "code": "ALLP",
+    "name": "ALLEPPEY",
+    "lat": 9.483759,
+    "lon": 76.32247600000001
+  },
+  {
+    "code": "ALY",
+    "name": "ALLAHABAD CITY",
+    "lat": 25.442410000000002,
+    "lon": 81.829736
+  },
+  {
+    "code": "AMI",
+    "name": "Amravati",
+    "lat": 20.930082900000002,
+    "lon": 77.7577863
+  },
+  {
+    "code": "AMLA",
+    "name": "AMLA JN",
+    "lat": 21.919717000000002,
+    "lon": 78.123187
+  },
+  {
+    "code": "AMP",
+    "name": "AHMADPUR JN",
+    "lat": 23.8325090573,
+    "lon": 87.6928410938
+  },
+  {
+    "code": "ANDN",
+    "name": "Anand Nagar",
+    "lat": 27.103714,
+    "lon": 83.270698
+  },
+  {
+    "code": "ANND",
+    "name": "ANAND JN",
+    "lat": 22.561307,
+    "lon": 72.965733
+  },
+  {
+    "code": "ANVT",
+    "name": "ANAND VIHAR TRM",
+    "lat": 28.650503565399998,
+    "lon": 77.31521255
+  },
+  {
+    "code": "APDJ",
+    "name": "ALIPUR DUAR JN",
+    "lat": 26.523279,
+    "lon": 89.534048
+  },
+  {
+    "code": "APH",
+    "name": "ANUPGARH",
+    "lat": 29.1968977,
+    "lon": 73.2045643
+  },
+  {
+    "code": "APR",
+    "name": "ANUPPUR JN",
+    "lat": 23.117312,
+    "lon": 81.695967
+  },
+  {
+    "code": "ARJ",
+    "name": "AUNRIHAR JN",
+    "lat": 25.54466,
+    "lon": 83.18727200000001
+  },
+  {
+    "code": "ASH",
+    "name": "AISHBAGH",
+    "lat": 26.8373880081,
+    "lon": 80.90960679930001
+  },
+  {
+    "code": "ASK",
+    "name": "ARSIKERE JN",
+    "lat": 13.314425,
+    "lon": 76.2520848
+  },
+  {
+    "code": "ASN",
+    "name": "ASANSOL JN",
+    "lat": 23.691441,
+    "lon": 86.975152
+  },
+  {
+    "code": "ASR",
+    "name": "AMRITSAR JN",
+    "lat": 31.631511999999997,
+    "lon": 74.858025
+  },
+  {
+    "code": "ASSH",
+    "name": "AISHBAGH",
+    "lat": 26.836088,
+    "lon": 80.908616
+  },
+  {
+    "code": "ASV",
+    "name": "ASARVA JN",
+    "lat": 23.043981000000002,
+    "lon": 72.612937
+  },
+  {
+    "code": "AVP",
+    "name": "Abhanpur Junction",
+    "lat": 21.052203000000002,
+    "lon": 81.74489899999999
+  },
+  {
+    "code": "AZ",
+    "name": "AZIMGANJ JN",
+    "lat": 24.219053,
+    "lon": 88.256764
+  },
+  {
+    "code": "BAT",
+    "name": "Batala Junction",
+    "lat": 31.8214816,
+    "lon": 75.1944316
+  },
+  {
+    "code": "BAY",
+    "name": "BELLARY JN",
+    "lat": 15.145135,
+    "lon": 76.921995
+  },
+  {
+    "code": "BBK",
+    "name": "BARABANKI JN",
+    "lat": 26.935335,
+    "lon": 81.18104
+  },
+  {
+    "code": "BBQ",
+    "name": "BASIN BRIDGE JN",
+    "lat": 13.102361,
+    "lon": 80.27122100000001
+  },
+  {
+    "code": "BBS",
+    "name": "BHUBANESWAR",
+    "lat": 20.265388,
+    "lon": 85.84259499999999
+  },
+  {
+    "code": "BCA",
+    "name": "BACHWARA JN",
+    "lat": 25.5812576,
+    "lon": 85.90014240000001
+  },
+  {
+    "code": "BCB",
+    "name": "Bhowra Junction",
+    "lat": 23.67077,
+    "lon": 86.417009
+  },
+  {
+    "code": "BCHN",
+    "name": "Bochasan Junction",
+    "lat": 22.402073,
+    "lon": 72.847673
+  },
+  {
+    "code": "BCT",
+    "name": "Mumbai Central",
+    "lat": 18.970667,
+    "lon": 72.819383
+  },
+  {
+    "code": "BD",
+    "name": "BADNERA JN",
+    "lat": 20.8567925,
+    "lon": 77.73231969999999
+  },
+  {
+    "code": "BDC",
+    "name": "BANDEL JN",
+    "lat": 22.9236565,
+    "lon": 88.3793623
+  },
+  {
+    "code": "BDME",
+    "name": "Baidyanathdham Deoghar",
+    "lat": 24.4892623,
+    "lon": 86.6920701
+  },
+  {
+    "code": "BDTS",
+    "name": "MUMBAI BANDRA TERMINUS",
+    "lat": 19.061911,
+    "lon": 72.840535
+  },
+  {
+    "code": "BE",
+    "name": "BAREILLY",
+    "lat": 28.337154299999998,
+    "lon": 79.4108444
+  },
+  {
+    "code": "BEC",
+    "name": "BERACH JN CABIN",
+    "lat": 24.896441999999997,
+    "lon": 74.61523199999999
+  },
+  {
+    "code": "BGKT",
+    "name": "BHAGAT KI KOTHI",
+    "lat": 26.2484972,
+    "lon": 73.0133366
+  },
+  {
+    "code": "BGP",
+    "name": "BHAGALPUR",
+    "lat": 25.241909300000003,
+    "lon": 86.9767918
+  },
+  {
+    "code": "BH",
+    "name": "BHARUCH JN",
+    "lat": 21.706907,
+    "lon": 72.997689
+  },
+  {
+    "code": "BHRL",
+    "name": "BHAROLI JUNCTION",
+    "lat": 32.27104809,
+    "lon": 75.61637323000001
+  },
+  {
+    "code": "BHUJ",
+    "name": "BHUJ",
+    "lat": 23.2660225,
+    "lon": 69.6778278
+  },
+  {
+    "code": "BHW",
+    "name": "BARHARWA JN",
+    "lat": 24.857748,
+    "lon": 87.77449299999999
+  },
+  {
+    "code": "BIM",
+    "name": "BILIMORA JN",
+    "lat": 20.763319,
+    "lon": 72.970474
+  },
+  {
+    "code": "BINA",
+    "name": "BINA JN",
+    "lat": 24.170973500000002,
+    "lon": 78.1831998
+  },
+  {
+    "code": "BIR",
+    "name": "Bir",
+    "lat": 22.05264,
+    "lon": 76.547232
+  },
+  {
+    "code": "BIX",
+    "name": "BHIND",
+    "lat": 26.588904900000003,
+    "lon": 78.77743530000001
+  },
+  {
+    "code": "BJE",
+    "name": "Bhojudih Junction",
+    "lat": 23.642174999999998,
+    "lon": 86.4469993
+  },
+  {
+    "code": "BJP",
+    "name": "BIJAPUR",
+    "lat": 16.8310603,
+    "lon": 75.7400012
+  },
+  {
+    "code": "BJPL",
+    "name": "BAIJNATH PAPROLA",
+    "lat": 32.050368999999996,
+    "lon": 76.632508
+  },
+  {
+    "code": "BJU",
+    "name": "BARAUNI JN",
+    "lat": 25.461768000000003,
+    "lon": 85.988748
+  },
+  {
+    "code": "BKI",
+    "name": "BANDIKUI JN",
+    "lat": 27.039271,
+    "lon": 76.56672300000001
+  },
+  {
+    "code": "BKN",
+    "name": "BIKANER JN",
+    "lat": 28.014139,
+    "lon": 73.31659800000001
+  },
+  {
+    "code": "BKP",
+    "name": "BAKHTIYARPUR JN",
+    "lat": 25.456110000000002,
+    "lon": 85.52956400000001
+  },
+  {
+    "code": "BL",
+    "name": "VALSAD",
+    "lat": 20.6085595,
+    "lon": 72.9335291
+  },
+  {
+    "code": "BLGT",
+    "name": "BALURGHAT",
+    "lat": 25.232648,
+    "lon": 88.757636
+  },
+  {
+    "code": "BLM",
+    "name": "BALAMU JN",
+    "lat": 27.167362999999998,
+    "lon": 80.352497
+  },
+  {
+    "code": "BLN",
+    "name": "BALLYGUNGE JN",
+    "lat": 22.51983196,
+    "lon": 88.37206854
+  },
+  {
+    "code": "BLT",
+    "name": "BALOTRA JN",
+    "lat": 25.830070999999997,
+    "lon": 72.248683
+  },
+  {
+    "code": "BME",
+    "name": "BARMER",
+    "lat": 25.744521900000002,
+    "lon": 71.397067
+  },
+  {
+    "code": "BNDA",
+    "name": "BANDA JN",
+    "lat": 25.477677,
+    "lon": 80.336246
+  },
+  {
+    "code": "BNKI",
+    "name": "Banmankhi Junction",
+    "lat": 25.885092,
+    "lon": 87.193664
+  },
+  {
+    "code": "BNW",
+    "name": "Bhiwani",
+    "lat": 28.7984261,
+    "lon": 76.1255797
+  },
+  {
+    "code": "BOE",
+    "name": "BARSOI JN",
+    "lat": 25.651242200000002,
+    "lon": 87.9229421
+  },
+  {
+    "code": "BPB",
+    "name": "BADARPUR JN",
+    "lat": 24.865177499999998,
+    "lon": 92.5563227
+  },
+  {
+    "code": "BPL",
+    "name": "BHOPAL JN",
+    "lat": 23.266884384300003,
+    "lon": 77.4131428577
+  },
+  {
+    "code": "BPQ",
+    "name": "BALHARSHAH",
+    "lat": 19.8490173,
+    "lon": 79.3485858
+  },
+  {
+    "code": "BPR",
+    "name": "BHOJIPURA JN",
+    "lat": 28.4939826,
+    "lon": 79.44724
+  },
+  {
+    "code": "BRC",
+    "name": "VADODARA JN",
+    "lat": 22.310756,
+    "lon": 73.181065
+  },
+  {
+    "code": "BRGM",
+    "name": "Baraigram Junction",
+    "lat": 24.684059,
+    "lon": 92.344106
+  },
+  {
+    "code": "BRKA",
+    "name": "BARKAKANA",
+    "lat": 23.624159,
+    "lon": 85.469553
+  },
+  {
+    "code": "BRMT",
+    "name": "Baramati",
+    "lat": 18.1536772,
+    "lon": 74.5781969
+  },
+  {
+    "code": "BRP",
+    "name": "Baruipur Junction",
+    "lat": 22.366657999999997,
+    "lon": 88.431647
+  },
+  {
+    "code": "BRWD",
+    "name": "BARWADIH JN",
+    "lat": 23.843836,
+    "lon": 84.11877999999999
+  },
+  {
+    "code": "BRY",
+    "name": "BAREILLY",
+    "lat": 28.3372843,
+    "lon": 79.4109744
+  },
+  {
+    "code": "BSB",
+    "name": "VARANASI JN",
+    "lat": 25.327281,
+    "lon": 82.986468
+  },
+  {
+    "code": "BSL",
+    "name": "BHUSAVAL JN",
+    "lat": 21.0472812,
+    "lon": 75.78867170000001
+  },
+  {
+    "code": "BSP",
+    "name": "BILASPUR JN",
+    "lat": 22.057473,
+    "lon": 82.167585
+  },
+  {
+    "code": "BTC",
+    "name": "Balaghat Junction",
+    "lat": 21.8116285,
+    "lon": 80.19988529999999
+  },
+  {
+    "code": "BTD",
+    "name": "BOTAD JN",
+    "lat": 22.182870599999998,
+    "lon": 71.6655966
+  },
+  {
+    "code": "BTDF",
+    "name": "BOTAD JN",
+    "lat": 22.182670599999998,
+    "lon": 71.6653966
+  },
+  {
+    "code": "BTE",
+    "name": "BHARATPUR JN",
+    "lat": 27.237106999999998,
+    "lon": 77.488613
+  },
+  {
+    "code": "BTI",
+    "name": "BHATINDA JN",
+    "lat": 30.209488,
+    "lon": 74.932083
+  },
+  {
+    "code": "BTT",
+    "name": "BHATNI JN",
+    "lat": 26.381257,
+    "lon": 83.934035
+  },
+  {
+    "code": "BUF",
+    "name": "Bimlagarh Junction",
+    "lat": 21.964332,
+    "lon": 85.017326
+  },
+  {
+    "code": "BUI",
+    "name": "BALLIA",
+    "lat": 25.76057,
+    "lon": 84.15311999999999
+  },
+  {
+    "code": "BVA",
+    "name": "BAURIA JN",
+    "lat": 22.5035911202,
+    "lon": 88.1635216052
+  },
+  {
+    "code": "BVC",
+    "name": "BHAVNAGAR TERMINUS",
+    "lat": 21.781668,
+    "lon": 72.141059
+  },
+  {
+    "code": "BVRM",
+    "name": "Bhimavaram Junction",
+    "lat": 16.543097,
+    "lon": 81.538335
+  },
+  {
+    "code": "BWN",
+    "name": "BARDDHAMAN JN",
+    "lat": 23.249718,
+    "lon": 87.87028099999999
+  },
+  {
+    "code": "BXN",
+    "name": "BAYANA JN",
+    "lat": 26.916354000000002,
+    "lon": 77.29713100000001
+  },
+  {
+    "code": "BXR",
+    "name": "BUXAR",
+    "lat": 25.562067,
+    "lon": 83.982184
+  },
+  {
+    "code": "BZA",
+    "name": "VIJAYAWADA JN",
+    "lat": 16.518262,
+    "lon": 80.61864800000001
+  },
+  {
+    "code": "CAN",
+    "name": "KANNUR",
+    "lat": 11.870694199999999,
+    "lon": 75.3683267
+  },
+  {
+    "code": "CAPE",
+    "name": "KANYAKUMARI",
+    "lat": 8.088028,
+    "lon": 77.542504
+  },
+  {
+    "code": "CBE",
+    "name": "COIMBATORE JN",
+    "lat": 10.997639,
+    "lon": 76.966298
+  },
+  {
+    "code": "CCP",
+    "name": "Chhuchhapura Junction",
+    "lat": 22.214729000000002,
+    "lon": 73.594519
+  },
+  {
+    "code": "CDG",
+    "name": "CHANDIGARH",
+    "lat": 30.7019773,
+    "lon": 76.82208
+  },
+  {
+    "code": "CGL",
+    "name": "CHENGALPATTU",
+    "lat": 12.692863999999998,
+    "lon": 79.981519
+  },
+  {
+    "code": "CH",
+    "name": "CHANDAUSI JN",
+    "lat": 28.458626000000002,
+    "lon": 78.780268
+  },
+  {
+    "code": "CHRM",
+    "name": "Chirmiri",
+    "lat": 23.1894855,
+    "lon": 82.34955079999999
+  },
+  {
+    "code": "CIL",
+    "name": "CHILBILA JN",
+    "lat": 25.947331,
+    "lon": 82.004241
+  },
+  {
+    "code": "CKP",
+    "name": "CHAKRADHARPUR",
+    "lat": 22.678979,
+    "lon": 85.62777100000001
+  },
+  {
+    "code": "CLA",
+    "name": "KURLA JN",
+    "lat": 19.065221,
+    "lon": 72.879375
+  },
+  {
+    "code": "CLD",
+    "name": "CHALSA JN",
+    "lat": 26.882215,
+    "lon": 88.798213
+  },
+  {
+    "code": "CLT",
+    "name": "KOZHIKODE",
+    "lat": 11.246234,
+    "lon": 75.780407
+  },
+  {
+    "code": "CMNR",
+    "name": "CHAMARAJANAGAR",
+    "lat": 11.934891,
+    "lon": 76.932807
+  },
+  {
+    "code": "CNB",
+    "name": "KANPUR CENTRAL",
+    "lat": 26.454240000000002,
+    "lon": 80.350966
+  },
+  {
+    "code": "CNI",
+    "name": "CHANDIL JN",
+    "lat": 22.956014,
+    "lon": 86.07210900000001
+  },
+  {
+    "code": "COA",
+    "name": "Kakinada Port",
+    "lat": 16.955204000000002,
+    "lon": 82.240057
+  },
+  {
+    "code": "CPJ",
+    "name": "KAPTANGANJ JN",
+    "lat": 26.926388,
+    "lon": 83.69990700000001
+  },
+  {
+    "code": "CPK",
+    "name": "CHAPARMUKH JN",
+    "lat": 26.202272,
+    "lon": 92.511718
+  },
+  {
+    "code": "CPN",
+    "name": "CHAMPANER RD JN",
+    "lat": 22.541916,
+    "lon": 73.393378
+  },
+  {
+    "code": "CPR",
+    "name": "CHHAPRA",
+    "lat": 25.788320000000002,
+    "lon": 84.725004
+  },
+  {
+    "code": "CPU",
+    "name": "CHOPAN",
+    "lat": 24.51403,
+    "lon": 83.025843
+  },
+  {
+    "code": "CSMA",
+    "name": "Chanasma Junction",
+    "lat": 23.710492,
+    "lon": 72.11188299999999
+  },
+  {
+    "code": "CSN",
+    "name": "CHALISGAON JN",
+    "lat": 20.464109,
+    "lon": 74.999049
+  },
+  {
+    "code": "CSTM",
+    "name": "MUMBAI CST",
+    "lat": 18.944481,
+    "lon": 72.836903
+  },
+  {
+    "code": "CTC",
+    "name": "CUTTACK",
+    "lat": 20.466587999999998,
+    "lon": 85.90156
+  },
+  {
+    "code": "CUR",
+    "name": "Churu",
+    "lat": 28.288281,
+    "lon": 74.966203
+  },
+  {
+    "code": "CWA",
+    "name": "Chhindwara Junction",
+    "lat": 22.058201,
+    "lon": 78.953212
+  },
+  {
+    "code": "DAC",
+    "name": "DAHINSARA JN",
+    "lat": 22.955606999999997,
+    "lon": 70.618291
+  },
+  {
+    "code": "DARI",
+    "name": "Dhari Junction",
+    "lat": 21.326767,
+    "lon": 71.027594
+  },
+  {
+    "code": "DAS",
+    "name": "DHASA JN",
+    "lat": 21.782545,
+    "lon": 71.51800800000001
+  },
+  {
+    "code": "DB",
+    "name": "Dabhoi Junction",
+    "lat": 22.137755,
+    "lon": 73.415466
+  },
+  {
+    "code": "DBG",
+    "name": "DARBHANGA JN",
+    "lat": 26.157088,
+    "lon": 85.907575
+  },
+  {
+    "code": "DBRG",
+    "name": "DIBRUGARH",
+    "lat": 27.463606565899997,
+    "lon": 94.93525791020001
+  },
+  {
+    "code": "DBRT",
+    "name": "DIBRUGARH TOWN",
+    "lat": 27.4781132774,
+    "lon": 94.9019739417
+  },
+  {
+    "code": "DD",
+    "name": "DAUND JN",
+    "lat": 18.463547,
+    "lon": 74.578622
+  },
+  {
+    "code": "DDA",
+    "name": "DURAUNDHA JN",
+    "lat": 26.086973,
+    "lon": 84.45894600000001
+  },
+  {
+    "code": "DDN",
+    "name": "DEHRADUN",
+    "lat": 30.3140377,
+    "lon": 78.0336011
+  },
+  {
+    "code": "DEE",
+    "name": "DELHI SARAI ROHILLA",
+    "lat": 28.662992,
+    "lon": 77.187106
+  },
+  {
+    "code": "DG",
+    "name": "DINDIGUL JN",
+    "lat": 10.35381,
+    "lon": 77.985472
+  },
+  {
+    "code": "DGHA",
+    "name": "Digha Flag Station",
+    "lat": 21.622377,
+    "lon": 87.507655
+  },
+  {
+    "code": "DGJ",
+    "name": "DUNGAR JN",
+    "lat": 21.078274,
+    "lon": 71.55322600000001
+  },
+  {
+    "code": "DHI",
+    "name": "Dhule",
+    "lat": 20.887752,
+    "lon": 74.768847
+  },
+  {
+    "code": "DHN",
+    "name": "DHANBAD JN",
+    "lat": 23.790966,
+    "lon": 86.428956
+  },
+  {
+    "code": "DJ",
+    "name": "Darjeeling",
+    "lat": 27.038151,
+    "lon": 88.263326
+  },
+  {
+    "code": "DKJ",
+    "name": "DORNAKAL JN",
+    "lat": 17.445987000000002,
+    "lon": 80.153157
+  },
+  {
+    "code": "DLI",
+    "name": "OLD DELHI",
+    "lat": 28.661815999999998,
+    "lon": 77.228356
+  },
+  {
+    "code": "DLJ",
+    "name": "DHOLA JN",
+    "lat": 21.822549000000002,
+    "lon": 71.738273
+  },
+  {
+    "code": "DLN",
+    "name": "DILDARNAGAR JN",
+    "lat": 25.419424,
+    "lon": 83.668324
+  },
+  {
+    "code": "DMA",
+    "name": "DAMODAR JUNCTION",
+    "lat": 23.651021,
+    "lon": 86.908517
+  },
+  {
+    "code": "DMM",
+    "name": "DHARMAVARAM JN",
+    "lat": 14.424368999999999,
+    "lon": 77.717115
+  },
+  {
+    "code": "DMW",
+    "name": "Dalmau Junction",
+    "lat": 26.075249999999997,
+    "lon": 81.05365
+  },
+  {
+    "code": "DNA",
+    "name": "DEGANA JN",
+    "lat": 26.897349,
+    "lon": 74.316388
+  },
+  {
+    "code": "DNR",
+    "name": "DANAPUR",
+    "lat": 25.581921,
+    "lon": 85.044629
+  },
+  {
+    "code": "DOS",
+    "name": "DEHRI ON SONE",
+    "lat": 24.914894999999998,
+    "lon": 84.185434
+  },
+  {
+    "code": "DR",
+    "name": "MUMBAI DADAR CENTRAL",
+    "lat": 19.017179,
+    "lon": 72.842972
+  },
+  {
+    "code": "DUI",
+    "name": "DHURI JN",
+    "lat": 30.372740999999998,
+    "lon": 75.86660300000001
+  },
+  {
+    "code": "DURG",
+    "name": "DURG",
+    "lat": 21.200326999999998,
+    "lon": 81.291837
+  },
+  {
+    "code": "DWJN",
+    "name": "DIVA JN. CABIN",
+    "lat": 19.188667,
+    "lon": 73.042923
+  },
+  {
+    "code": "DWR",
+    "name": "DHARWAR",
+    "lat": 15.440386,
+    "lon": 75.004552
+  },
+  {
+    "code": "ED",
+    "name": "ERODE JN",
+    "lat": 11.327682,
+    "lon": 77.72593400000001
+  },
+  {
+    "code": "ERS",
+    "name": "ERNAKULAM JN",
+    "lat": 9.969541999999999,
+    "lon": 76.290672
+  },
+  {
+    "code": "ERSC",
+    "name": "ERNAKULAM JN. C",
+    "lat": 9.978060000000001,
+    "lon": 76.28985899999999
+  },
+  {
+    "code": "ET",
+    "name": "ITARSI JN",
+    "lat": 22.608258,
+    "lon": 77.767128
+  },
+  {
+    "code": "FBD",
+    "name": "FARRUKHABAD",
+    "lat": 27.38236,
+    "lon": 79.57173700000001
+  },
+  {
+    "code": "FBG",
+    "name": "FORBESGANJ",
+    "lat": 26.298901,
+    "lon": 87.262803
+  },
+  {
+    "code": "FD",
+    "name": "FAIZABAD JN",
+    "lat": 26.768996,
+    "lon": 82.135574
+  },
+  {
+    "code": "FKG",
+    "name": "FURKATING JN",
+    "lat": 26.465652000000002,
+    "lon": 94.00269200000001
+  },
+  {
+    "code": "FKM",
+    "name": "FAKIRAGRAM JN",
+    "lat": 26.365237,
+    "lon": 90.186189
+  },
+  {
+    "code": "FL",
+    "name": "PHULERA JN",
+    "lat": 26.872814,
+    "lon": 75.24545599999999
+  },
+  {
+    "code": "FM",
+    "name": "KACHEGUDA FALAKNUMA",
+    "lat": 17.332197,
+    "lon": 78.474481
+  },
+  {
+    "code": "FTD",
+    "name": "Fatehabad Chowk Junction",
+    "lat": 23.009106,
+    "lon": 75.673338
+  },
+  {
+    "code": "FZR",
+    "name": "FIROZPUR CANT",
+    "lat": 30.942486,
+    "lon": 74.61843900000001
+  },
+  {
+    "code": "GAYA",
+    "name": "GAYA JN",
+    "lat": 24.803978,
+    "lon": 84.999294
+  },
+  {
+    "code": "GD",
+    "name": "GONDA JN",
+    "lat": 27.154613,
+    "lon": 81.97815200000001
+  },
+  {
+    "code": "GDA",
+    "name": "GODHRA JN",
+    "lat": 22.776974,
+    "lon": 73.603672
+  },
+  {
+    "code": "GDG",
+    "name": "GADAG JN",
+    "lat": 15.437048,
+    "lon": 75.642481
+  },
+  {
+    "code": "GDR",
+    "name": "GUDUR JN",
+    "lat": 14.148227,
+    "lon": 79.845121
+  },
+  {
+    "code": "GDV",
+    "name": "GUDIVADA JN",
+    "lat": 16.429888,
+    "lon": 80.987594
+  },
+  {
+    "code": "GEDE",
+    "name": "Gede",
+    "lat": 23.491197,
+    "lon": 88.786737
+  },
+  {
+    "code": "GG",
+    "name": "GANDHIGRAM",
+    "lat": 23.02676,
+    "lon": 72.568831
+  },
+  {
+    "code": "GHY",
+    "name": "GUWAHATI",
+    "lat": 26.182635,
+    "lon": 91.751851
+  },
+  {
+    "code": "GIMB",
+    "name": "GANDHIDHAM BG",
+    "lat": 23.069086,
+    "lon": 70.14775399999999
+  },
+  {
+    "code": "GIR",
+    "name": "Gainsari Junction",
+    "lat": 27.526839296800002,
+    "lon": 82.5441789069
+  },
+  {
+    "code": "GJL",
+    "name": "GAJRAULA JN",
+    "lat": 28.834937999999998,
+    "lon": 78.250784
+  },
+  {
+    "code": "GKP",
+    "name": "GORAKHPUR JN",
+    "lat": 26.759311,
+    "lon": 83.381499
+  },
+  {
+    "code": "GMO",
+    "name": "GOMOH JN",
+    "lat": 23.873106,
+    "lon": 86.14823
+  },
+  {
+    "code": "GNT",
+    "name": "GUNTUR JN",
+    "lat": 16.300784,
+    "lon": 80.44197299999999
+  },
+  {
+    "code": "GRD",
+    "name": "Giridih",
+    "lat": 24.182255899999998,
+    "lon": 86.3146452
+  },
+  {
+    "code": "GTL",
+    "name": "GUNTAKAL JN",
+    "lat": 15.17556,
+    "lon": 77.36661099999999
+  },
+  {
+    "code": "GUV",
+    "name": "GURUVAYUR",
+    "lat": 10.596896,
+    "lon": 76.045457
+  },
+  {
+    "code": "GWL",
+    "name": "GWALIOR JN",
+    "lat": 26.216483,
+    "lon": 78.18229199999999
+  },
+  {
+    "code": "GY",
+    "name": "GOOTY JN",
+    "lat": 15.149208,
+    "lon": 77.625823
+  },
+  {
+    "code": "GYJ",
+    "name": "GOOTY JUNCTION CABIN",
+    "lat": 15.140041,
+    "lon": 77.650955
+  },
+  {
+    "code": "HAS",
+    "name": "Hassan Junction",
+    "lat": 13.003182,
+    "lon": 76.117359
+  },
+  {
+    "code": "HBJ",
+    "name": "HABIBGANJ",
+    "lat": 23.221979,
+    "lon": 77.43942899999999
+  },
+  {
+    "code": "HDB",
+    "name": "HALDIBARI",
+    "lat": 26.334952,
+    "lon": 88.78193599999999
+  },
+  {
+    "code": "HJN",
+    "name": "HOWRAH JN. CABIN",
+    "lat": 22.583533,
+    "lon": 88.342811
+  },
+  {
+    "code": "HJP",
+    "name": "HAJIPUR JN",
+    "lat": 25.702909000000002,
+    "lon": 85.2155
+  },
+  {
+    "code": "HM",
+    "name": "HADMATIYA JN",
+    "lat": 22.4279053359,
+    "lon": 70.47043762019999
+  },
+  {
+    "code": "HMH",
+    "name": "HANUMANGARH JN",
+    "lat": 29.614904,
+    "lon": 74.297633
+  },
+  {
+    "code": "HPT",
+    "name": "HOSPET JN",
+    "lat": 15.286807,
+    "lon": 76.38578
+  },
+  {
+    "code": "HRS",
+    "name": "HATHRAS JN",
+    "lat": 27.62483,
+    "lon": 78.13706699999999
+  },
+  {
+    "code": "HSR",
+    "name": "Hisar",
+    "lat": 29.152341,
+    "lon": 75.724305
+  },
+  {
+    "code": "HTE",
+    "name": "HATIA",
+    "lat": 23.311612999999998,
+    "lon": 85.308218
+  },
+  {
+    "code": "HTZ",
+    "name": "HATHIDAH JN",
+    "lat": 25.367027,
+    "lon": 85.987826
+  },
+  {
+    "code": "HW",
+    "name": "HARIDWAR JN",
+    "lat": 29.947787,
+    "lon": 78.15489899999999
+  },
+  {
+    "code": "HWH",
+    "name": "HOWRAH JN",
+    "lat": 22.584077999999998,
+    "lon": 88.34099900000001
+  },
+  {
+    "code": "HYB",
+    "name": "HYDERABAD DECCAN",
+    "lat": 17.393362999999997,
+    "lon": 78.467377
+  },
+  {
+    "code": "IAA",
+    "name": "INDARA JN",
+    "lat": 25.987832,
+    "lon": 83.61961099999999
+  },
+  {
+    "code": "IDH",
+    "name": "IDGAH AGRA JN",
+    "lat": 27.17265,
+    "lon": 77.997807
+  },
+  {
+    "code": "INDB",
+    "name": "INDORE JN BG",
+    "lat": 22.71757,
+    "lon": 75.868429
+  },
+  {
+    "code": "INDM",
+    "name": "Indore Junction MG",
+    "lat": 22.717139,
+    "lon": 75.868072
+  },
+  {
+    "code": "ITR",
+    "name": "ITWARI",
+    "lat": 21.157819,
+    "lon": 79.11923700000001
+  },
+  {
+    "code": "JAJ",
+    "name": "JHAJHA",
+    "lat": 24.779456,
+    "lon": 86.399854
+  },
+  {
+    "code": "JAT",
+    "name": "JAMMU TAWI",
+    "lat": 32.706975,
+    "lon": 74.880117
+  },
+  {
+    "code": "JBN",
+    "name": "JOGBANI",
+    "lat": 26.402263,
+    "lon": 87.263262
+  },
+  {
+    "code": "JBP",
+    "name": "JABALPUR",
+    "lat": 23.164636,
+    "lon": 79.950919
+  },
+  {
+    "code": "JDH",
+    "name": "JAM JODHPUR JN",
+    "lat": 21.906659,
+    "lon": 70.03138700000001
+  },
+  {
+    "code": "JGM",
+    "name": "JHARGRAM",
+    "lat": 22.4549644863,
+    "lon": 86.9985316705
+  },
+  {
+    "code": "JHL",
+    "name": "JAKHAL JN",
+    "lat": 29.8018131127,
+    "lon": 75.8245009833
+  },
+  {
+    "code": "JHS",
+    "name": "JHANSI JN",
+    "lat": 25.443585,
+    "lon": 78.55298499999999
+  },
+  {
+    "code": "JIND",
+    "name": "JIND JN",
+    "lat": 29.328875999999998,
+    "lon": 76.28961699999999
+  },
+  {
+    "code": "JJP",
+    "name": "Jhanjharpur",
+    "lat": 26.228493,
+    "lon": 86.267833
+  },
+  {
+    "code": "JKM",
+    "name": "JANKAMPET JN",
+    "lat": 18.70264,
+    "lon": 78.05386
+  },
+  {
+    "code": "JL",
+    "name": "JALGAON JN",
+    "lat": 21.018114999999998,
+    "lon": 75.56287499999999
+  },
+  {
+    "code": "JLR",
+    "name": "JETALSAR JN",
+    "lat": 21.729374,
+    "lon": 70.57391
+  },
+  {
+    "code": "JM",
+    "name": "JALAMB JN",
+    "lat": 20.813007000000002,
+    "lon": 76.573236
+  },
+  {
+    "code": "JMP",
+    "name": "JAMALPUR JN",
+    "lat": 25.313906,
+    "lon": 86.492285
+  },
+  {
+    "code": "JND",
+    "name": "JUNAGADH JN",
+    "lat": 21.530606,
+    "lon": 70.457612
+  },
+  {
+    "code": "JNH",
+    "name": "JANGHAI JN",
+    "lat": 25.549911,
+    "lon": 82.310962
+  },
+  {
+    "code": "JNU",
+    "name": "JAUNPUR JN",
+    "lat": 25.762849,
+    "lon": 82.69969599999999
+  },
+  {
+    "code": "JP",
+    "name": "JAIPUR",
+    "lat": 26.920203,
+    "lon": 75.786923
+  },
+  {
+    "code": "JRU",
+    "name": "CHIKJAJUR JN",
+    "lat": 14.126112,
+    "lon": 76.138705
+  },
+  {
+    "code": "JSG",
+    "name": "JHARSUGUDA JN",
+    "lat": 21.862274,
+    "lon": 84.017427
+  },
+  {
+    "code": "JSM",
+    "name": "JAISALMER",
+    "lat": 26.91655,
+    "lon": 70.92823899999999
+  },
+  {
+    "code": "JSME",
+    "name": "JASIDIH JN",
+    "lat": 24.514517,
+    "lon": 86.644255
+  },
+  {
+    "code": "JTJ",
+    "name": "JOLARPETTAI",
+    "lat": 12.560851999999999,
+    "lon": 78.57781999999999
+  },
+  {
+    "code": "JU",
+    "name": "JODHPUR JN",
+    "lat": 26.283765,
+    "lon": 73.02319
+  },
+  {
+    "code": "JUC",
+    "name": "JALANDHAR CITY",
+    "lat": 31.331665,
+    "lon": 75.591499
+  },
+  {
+    "code": "JVN",
+    "name": "JORAWARNAGAR JN",
+    "lat": 22.71246,
+    "lon": 71.641594
+  },
+  {
+    "code": "JYG",
+    "name": "JAYNAGAR",
+    "lat": 26.589465,
+    "lon": 86.134871
+  },
+  {
+    "code": "KAN",
+    "name": "KHANA JN",
+    "lat": 23.320577,
+    "lon": 87.769547
+  },
+  {
+    "code": "KCG",
+    "name": "KACHEGUDA",
+    "lat": 17.389561,
+    "lon": 78.499756
+  },
+  {
+    "code": "KCVL",
+    "name": "KOCHUVELI",
+    "lat": 8.509254,
+    "lon": 76.8961
+  },
+  {
+    "code": "KDS",
+    "name": "KASUNDA JN",
+    "lat": 23.7899886114,
+    "lon": 86.39589356020001
+  },
+  {
+    "code": "KGG",
+    "name": "KHAGARIA JN",
+    "lat": 25.505891,
+    "lon": 86.46525100000001
+  },
+  {
+    "code": "KGM",
+    "name": "KATHGODAM",
+    "lat": 29.266583,
+    "lon": 79.54633
+  },
+  {
+    "code": "KGP",
+    "name": "KHARAGPUR JN",
+    "lat": 22.341431999999998,
+    "lon": 87.32845599999999
+  },
+  {
+    "code": "KID",
+    "name": "KHAIRAR JN",
+    "lat": 25.451955,
+    "lon": 80.236073
+  },
+  {
+    "code": "KIR",
+    "name": "KATIHAR JN",
+    "lat": 25.548947,
+    "lon": 87.566409
+  },
+  {
+    "code": "KIUL",
+    "name": "KIUL JN",
+    "lat": 25.171504,
+    "lon": 86.106198
+  },
+  {
+    "code": "KJV",
+    "name": "Khijadiya Junction",
+    "lat": 21.740875,
+    "lon": 71.275556
+  },
+  {
+    "code": "KKDE",
+    "name": "KURUKSHETRA JN",
+    "lat": 29.969440000000002,
+    "lon": 76.852795
+  },
+  {
+    "code": "KKDI",
+    "name": "Karaikkudi Junction",
+    "lat": 10.068518,
+    "lon": 78.79331499999999
+  },
+  {
+    "code": "KKV",
+    "name": "Kunkavav Junction",
+    "lat": 21.653448,
+    "lon": 70.975052
+  },
+  {
+    "code": "KLK",
+    "name": "Kalka",
+    "lat": 30.837667,
+    "lon": 76.931759
+  },
+  {
+    "code": "KLL",
+    "name": "KALOL JN",
+    "lat": 23.244576000000002,
+    "lon": 72.50363
+  },
+  {
+    "code": "KNH",
+    "name": "Konch",
+    "lat": 25.99510551,
+    "lon": 79.15770702
+  },
+  {
+    "code": "KNHN",
+    "name": "KANTHAN JN",
+    "lat": 21.225502000000002,
+    "lon": 79.238908
+  },
+  {
+    "code": "KNJ",
+    "name": "Krishnanagar City Junction",
+    "lat": 23.388714,
+    "lon": 88.493636
+  },
+  {
+    "code": "KNLS",
+    "name": "KANALAS JN",
+    "lat": 22.319955,
+    "lon": 69.896549
+  },
+  {
+    "code": "KNW",
+    "name": "KHANDWA",
+    "lat": 21.823596,
+    "lon": 76.353227
+  },
+  {
+    "code": "KOAA",
+    "name": "KOLKATA CHITPUR",
+    "lat": 22.601174999999998,
+    "lon": 88.385179
+  },
+  {
+    "code": "KOK",
+    "name": "KORUKKUPET JN",
+    "lat": 13.120489801700002,
+    "lon": 80.27837727340001
+  },
+  {
+    "code": "KOP",
+    "name": "C SHAHU M RAJ KOLHAPUR TERM",
+    "lat": 16.70257,
+    "lon": 74.237695
+  },
+  {
+    "code": "KOTA",
+    "name": "KOTA JN",
+    "lat": 25.223553,
+    "lon": 75.8805
+  },
+  {
+    "code": "KPD",
+    "name": "KATPADI JN",
+    "lat": 12.972734,
+    "lon": 79.13534100000001
+  },
+  {
+    "code": "KPV",
+    "name": "KASHIPUR",
+    "lat": 29.204978,
+    "lon": 78.96071
+  },
+  {
+    "code": "KRBA",
+    "name": "Korba",
+    "lat": 22.337584,
+    "lon": 82.71301299999999
+  },
+  {
+    "code": "KRJ",
+    "name": "KHURJA JN",
+    "lat": 28.206407000000002,
+    "lon": 77.81903999999999
+  },
+  {
+    "code": "KRLR",
+    "name": "KARAILA ROAD JN",
+    "lat": 24.261080999999997,
+    "lon": 82.719311
+  },
+  {
+    "code": "KRNT",
+    "name": "KURNOOL TOWN",
+    "lat": 15.833715,
+    "lon": 78.032655
+  },
+  {
+    "code": "KSB",
+    "name": "KOSAMBA JN",
+    "lat": 21.464052,
+    "lon": 72.95459799999999
+  },
+  {
+    "code": "KSJ",
+    "name": "KASGANJ",
+    "lat": 27.801887,
+    "lon": 78.64602599999999
+  },
+  {
+    "code": "KSJF",
+    "name": "Kasganj Mg",
+    "lat": 27.801268,
+    "lon": 78.64517
+  },
+  {
+    "code": "KTE",
+    "name": "KATNI",
+    "lat": 23.833385,
+    "lon": 80.400543
+  },
+  {
+    "code": "KTLA",
+    "name": "KATKOLA JN",
+    "lat": 21.8521799207,
+    "lon": 69.8841357111
+  },
+  {
+    "code": "KTSC",
+    "name": "KOTA JN SOUTH C",
+    "lat": 25.198051,
+    "lon": 75.88511100000001
+  },
+  {
+    "code": "KTW",
+    "name": "KOTDWARA",
+    "lat": 29.742927896,
+    "lon": 78.52116372309999
+  },
+  {
+    "code": "KTX",
+    "name": "KATAKHAL JN",
+    "lat": 24.83436,
+    "lon": 92.62706700000001
+  },
+  {
+    "code": "KTYM",
+    "name": "KOTTAYAM",
+    "lat": 9.594177,
+    "lon": 76.532168
+  },
+  {
+    "code": "KUR",
+    "name": "KHURDA ROAD JN",
+    "lat": 20.153076,
+    "lon": 85.70823399999999
+  },
+  {
+    "code": "KUX",
+    "name": "Khirsadoh Junction",
+    "lat": 22.140449999999998,
+    "lon": 78.798394
+  },
+  {
+    "code": "KWAE",
+    "name": "KATWA",
+    "lat": 23.640315,
+    "lon": 88.124085
+  },
+  {
+    "code": "KXJ",
+    "name": "Karimganj Junction",
+    "lat": 24.860717,
+    "lon": 92.373769
+  },
+  {
+    "code": "KYJ",
+    "name": "KAYANKULAM JN",
+    "lat": 9.182586,
+    "lon": 76.512933
+  },
+  {
+    "code": "KYN",
+    "name": "KALYAN JN",
+    "lat": 19.234716000000002,
+    "lon": 73.12974
+  },
+  {
+    "code": "KYQ",
+    "name": "KAMAKHYA",
+    "lat": 26.156154,
+    "lon": 91.689505
+  },
+  {
+    "code": "KZJ",
+    "name": "KAZIPET JN",
+    "lat": 17.974211,
+    "lon": 79.511025
+  },
+  {
+    "code": "LAD",
+    "name": "Lohardaga",
+    "lat": 23.445967,
+    "lon": 84.70733
+  },
+  {
+    "code": "LD",
+    "name": "LONDA JN",
+    "lat": 15.450273,
+    "lon": 74.496982
+  },
+  {
+    "code": "LDH",
+    "name": "LUDHIANA JN",
+    "lat": 30.912367,
+    "lon": 75.84787299999999
+  },
+  {
+    "code": "LGH",
+    "name": "LALGARH JN",
+    "lat": 28.043638,
+    "lon": 73.313909
+  },
+  {
+    "code": "LGL",
+    "name": "Lalgola",
+    "lat": 24.421152,
+    "lon": 88.257513
+  },
+  {
+    "code": "LHU",
+    "name": "Loharu",
+    "lat": 28.427051,
+    "lon": 75.801613
+  },
+  {
+    "code": "LJN",
+    "name": "LUCKNOW JN",
+    "lat": 26.831967000000002,
+    "lon": 80.91858699999999
+  },
+  {
+    "code": "LKJN",
+    "name": "LINK JN. CABIN",
+    "lat": 25.356832,
+    "lon": 81.841869
+  },
+  {
+    "code": "LKO",
+    "name": "LUCKNOW",
+    "lat": 26.830675,
+    "lon": 80.925291
+  },
+  {
+    "code": "LKR",
+    "name": "LUCKEESARAI JN",
+    "lat": 25.1716617005,
+    "lon": 86.093210587
+  },
+  {
+    "code": "LKU",
+    "name": "LAL KUAN",
+    "lat": 29.071574,
+    "lon": 79.517641
+  },
+  {
+    "code": "LMG",
+    "name": "LUMDING JN",
+    "lat": 25.750035999999998,
+    "lon": 93.17660000000001
+  },
+  {
+    "code": "LMGF",
+    "name": "LUMDING JN",
+    "lat": 25.750176,
+    "lon": 93.17674000000001
+  },
+  {
+    "code": "LNK",
+    "name": "LOHIAN KHAS JN",
+    "lat": 31.165462,
+    "lon": 75.196445
+  },
+  {
+    "code": "LPI",
+    "name": "LINGAMPALLI",
+    "lat": 17.482874000000002,
+    "lon": 78.31677400000001
+  },
+  {
+    "code": "LRJ",
+    "name": "LAKSAR JN",
+    "lat": 29.754037999999998,
+    "lon": 78.019628
+  },
+  {
+    "code": "LTT",
+    "name": "LOKMANYA TILAK TERM",
+    "lat": 19.070320000000002,
+    "lon": 72.89173899999999
+  },
+  {
+    "code": "LUNI",
+    "name": "LUNI JN",
+    "lat": 26.001255999999998,
+    "lon": 73.003175
+  },
+  {
+    "code": "LWR",
+    "name": "ALNAVAR JN",
+    "lat": 15.424244,
+    "lon": 74.738116
+  },
+  {
+    "code": "MAE",
+    "name": "Matheran",
+    "lat": 18.989244,
+    "lon": 73.270911
+  },
+  {
+    "code": "MAJN",
+    "name": "MANGALORE JN",
+    "lat": 12.866193,
+    "lon": 74.88006
+  },
+  {
+    "code": "MAO",
+    "name": "MADGAON",
+    "lat": 15.267911000000002,
+    "lon": 73.97072399999999
+  },
+  {
+    "code": "MAQ",
+    "name": "MANGALORE CNTL",
+    "lat": 12.862325,
+    "lon": 74.844068
+  },
+  {
+    "code": "MAS",
+    "name": "CHENNAI CENTRAL",
+    "lat": 13.0847613,
+    "lon": 80.27485630000001
+  },
+  {
+    "code": "MAU",
+    "name": "MAU JN",
+    "lat": 25.93948,
+    "lon": 83.564347
+  },
+  {
+    "code": "MB",
+    "name": "MORADABAD",
+    "lat": 28.831621000000002,
+    "lon": 78.765801
+  },
+  {
+    "code": "MDA",
+    "name": "MANDHANA JN",
+    "lat": 26.557002,
+    "lon": 80.222507
+  },
+  {
+    "code": "MDP",
+    "name": "MADHUPUR JN",
+    "lat": 24.270633,
+    "lon": 86.642183
+  },
+  {
+    "code": "MDU",
+    "name": "MADURAI JN",
+    "lat": 9.919907,
+    "lon": 78.11031399999999
+  },
+  {
+    "code": "MFP",
+    "name": "MUZAFFARPUR JN",
+    "lat": 26.122311,
+    "lon": 85.378006
+  },
+  {
+    "code": "MGS",
+    "name": "MUGHAL SARAI JN",
+    "lat": 25.278149,
+    "lon": 83.11925000000001
+  },
+  {
+    "code": "MGSJ",
+    "name": "MAGNESITE JN",
+    "lat": 11.696253,
+    "lon": 78.096286
+  },
+  {
+    "code": "MHF",
+    "name": "Mohari Junction",
+    "lat": 26.70055271,
+    "lon": 77.55378492
+  },
+  {
+    "code": "MHOW",
+    "name": "Mhow",
+    "lat": 22.55518,
+    "lon": 75.771097
+  },
+  {
+    "code": "MHV",
+    "name": "MAHUVA JN",
+    "lat": 21.09412,
+    "lon": 71.756011
+  },
+  {
+    "code": "MJ",
+    "name": "MARWAR JN",
+    "lat": 25.720478999999997,
+    "lon": 73.609301
+  },
+  {
+    "code": "MJN",
+    "name": "Makum Junction",
+    "lat": 27.485742,
+    "lon": 95.440958
+  },
+  {
+    "code": "MJRI",
+    "name": "MAJRI JN",
+    "lat": 20.139283,
+    "lon": 79.043522
+  },
+  {
+    "code": "MKA",
+    "name": "MOKAMEH JN",
+    "lat": 25.391885,
+    "lon": 85.91304899999999
+  },
+  {
+    "code": "MKM",
+    "name": "Marikuppam",
+    "lat": 12.918968,
+    "lon": 78.263789
+  },
+  {
+    "code": "MKN",
+    "name": "MAKRANA JN",
+    "lat": 27.037532,
+    "lon": 74.72314899999999
+  },
+  {
+    "code": "MKP",
+    "name": "MANIKPUR JN",
+    "lat": 25.063492,
+    "lon": 81.09365700000001
+  },
+  {
+    "code": "MLDT",
+    "name": "MALDA TOWN",
+    "lat": 25.015659,
+    "lon": 88.130338
+  },
+  {
+    "code": "MLN",
+    "name": "MAILANI",
+    "lat": 28.284349000000002,
+    "lon": 80.347318
+  },
+  {
+    "code": "MLQ",
+    "name": "Malkera Junction",
+    "lat": 23.779733,
+    "lon": 86.29694900000001
+  },
+  {
+    "code": "MM",
+    "name": "MUMBAI MAHIM JN",
+    "lat": 19.040547,
+    "lon": 72.84687600000001
+  },
+  {
+    "code": "MMP",
+    "name": "MAMBALAPPATTU JN",
+    "lat": 11.95223333,
+    "lon": 79.37390499
+  },
+  {
+    "code": "MMR",
+    "name": "MANMAD JN",
+    "lat": 20.249887,
+    "lon": 74.438305
+  },
+  {
+    "code": "MNE",
+    "name": "MANSI JN",
+    "lat": 25.509398,
+    "lon": 86.554446
+  },
+  {
+    "code": "MNM",
+    "name": "MANAMADURAI JN",
+    "lat": 9.681538999999999,
+    "lon": 78.45351
+  },
+  {
+    "code": "MPO",
+    "name": "MANPUR JN",
+    "lat": 24.807111000000003,
+    "lon": 85.044738
+  },
+  {
+    "code": "MRJ",
+    "name": "MIRAJ JN",
+    "lat": 16.819946,
+    "lon": 74.638839
+  },
+  {
+    "code": "MS",
+    "name": "CHENNAI EGMORE",
+    "lat": 13.077677999999999,
+    "lon": 80.260193
+  },
+  {
+    "code": "MSB",
+    "name": "CHENNAI BEACH",
+    "lat": 13.09034,
+    "lon": 80.291601
+  },
+  {
+    "code": "MSH",
+    "name": "MAHESANA JN",
+    "lat": 23.602623,
+    "lon": 72.388708
+  },
+  {
+    "code": "MTC",
+    "name": "MEERUT CITY",
+    "lat": 28.977610000000002,
+    "lon": 77.675106
+  },
+  {
+    "code": "MTD",
+    "name": "MERTA ROAD JN",
+    "lat": 26.728077000000003,
+    "lon": 73.917896
+  },
+  {
+    "code": "MTJ",
+    "name": "MATHURA JN",
+    "lat": 27.480145,
+    "lon": 77.67311699999999
+  },
+  {
+    "code": "MTM",
+    "name": "Machilipatnam",
+    "lat": 16.171258,
+    "lon": 81.137763
+  },
+  {
+    "code": "MTP",
+    "name": "Mettupalayam",
+    "lat": 11.299729,
+    "lon": 76.934533
+  },
+  {
+    "code": "MUGR",
+    "name": "Manuguru",
+    "lat": 17.925272,
+    "lon": 80.799034
+  },
+  {
+    "code": "MUR",
+    "name": "MANKAPUR JN",
+    "lat": 27.039058,
+    "lon": 82.227648
+  },
+  {
+    "code": "MUV",
+    "name": "MANDUADIH",
+    "lat": 25.300001,
+    "lon": 82.972079
+  },
+  {
+    "code": "MV",
+    "name": "MAYILADUTURAI JN",
+    "lat": 11.095237000000001,
+    "lon": 79.62868
+  },
+  {
+    "code": "MVJ",
+    "name": "MAVLI JN",
+    "lat": 24.794585,
+    "lon": 73.973721
+  },
+  {
+    "code": "MXN",
+    "name": "MARIANI JN",
+    "lat": 26.652434999999997,
+    "lon": 94.30820299999999
+  },
+  {
+    "code": "MYGL",
+    "name": "MIYAGAM KARJAN JUNCTION NG",
+    "lat": 22.050131999999998,
+    "lon": 73.119763
+  },
+  {
+    "code": "MYS",
+    "name": "MYSORE JN",
+    "lat": 12.318946,
+    "lon": 76.646013
+  },
+  {
+    "code": "NAB",
+    "name": "Nagbhir Junction",
+    "lat": 20.579811999999997,
+    "lon": 79.700138
+  },
+  {
+    "code": "NAD",
+    "name": "NAGDA JN",
+    "lat": 23.45592,
+    "lon": 75.41249099999999
+  },
+  {
+    "code": "NBD",
+    "name": "NAJIBABAD JN",
+    "lat": 29.603540000000002,
+    "lon": 78.335733
+  },
+  {
+    "code": "NBQ",
+    "name": "NEW BONGAIGAON",
+    "lat": 26.4758354405,
+    "lon": 90.53684346440001
+  },
+  {
+    "code": "NCJ",
+    "name": "NAGERCOIL JN",
+    "lat": 8.17385,
+    "lon": 77.44347
+  },
+  {
+    "code": "NCR",
+    "name": "Nagore",
+    "lat": 10.818430000000001,
+    "lon": 79.846188
+  },
+  {
+    "code": "ND",
+    "name": "NADIAD JN",
+    "lat": 22.694105999999998,
+    "lon": 72.855718
+  },
+  {
+    "code": "NDD",
+    "name": "NIDADAVOLU JN",
+    "lat": 16.898297,
+    "lon": 81.67550399999999
+  },
+  {
+    "code": "NDLS",
+    "name": "NEW DELHI",
+    "lat": 28.642314,
+    "lon": 77.22000399999999
+  },
+  {
+    "code": "NED",
+    "name": "HUZUR SAHIB NANDED",
+    "lat": 19.160522,
+    "lon": 77.31047799999999
+  },
+  {
+    "code": "NFK",
+    "name": "NEW FARAKKA JN",
+    "lat": 24.794558,
+    "lon": 87.915236
+  },
+  {
+    "code": "NGA",
+    "name": "NINGALA JN",
+    "lat": 22.0252,
+    "lon": 71.70935200000001
+  },
+  {
+    "code": "NGP",
+    "name": "NAGPUR",
+    "lat": 21.153567,
+    "lon": 79.089004
+  },
+  {
+    "code": "NH",
+    "name": "NAIHATI JN",
+    "lat": 22.888555,
+    "lon": 88.4185
+  },
+  {
+    "code": "NHT",
+    "name": "NALHATI JN",
+    "lat": 24.295706,
+    "lon": 87.83867000000001
+  },
+  {
+    "code": "NIL",
+    "name": "Nilambur Road",
+    "lat": 11.278805,
+    "lon": 76.254779
+  },
+  {
+    "code": "NIR",
+    "name": "Nainpur Junction",
+    "lat": 22.425676,
+    "lon": 80.108853
+  },
+  {
+    "code": "NJP",
+    "name": "NEW JALPAIGURI",
+    "lat": 26.683025,
+    "lon": 88.443391
+  },
+  {
+    "code": "NKE",
+    "name": "NARKATIAGANJ JN",
+    "lat": 27.105035,
+    "lon": 84.464045
+  },
+  {
+    "code": "NKJ",
+    "name": "NEW KATNI JN",
+    "lat": 23.8136370394,
+    "lon": 80.4204539438
+  },
+  {
+    "code": "NMA",
+    "name": "Nirmali",
+    "lat": 26.305325,
+    "lon": 86.57461500000001
+  },
+  {
+    "code": "NMZ",
+    "name": "NEW MAL JN",
+    "lat": 26.87368,
+    "lon": 88.724837
+  },
+  {
+    "code": "NNP",
+    "name": "Nanpara Junction",
+    "lat": 27.859887,
+    "lon": 81.512594
+  },
+  {
+    "code": "NPR",
+    "name": "Nepalganj Road",
+    "lat": 28.010872,
+    "lon": 81.60073
+  },
+  {
+    "code": "NRKG",
+    "name": "NARKATIAGANJ JN",
+    "lat": 27.105025,
+    "lon": 84.46403500000001
+  },
+  {
+    "code": "NRL",
+    "name": "NERAL",
+    "lat": 19.027113,
+    "lon": 73.318955
+  },
+  {
+    "code": "NRO",
+    "name": "Nakodar Junction",
+    "lat": 31.111697,
+    "lon": 75.47560800000001
+  },
+  {
+    "code": "NRW",
+    "name": "NARWANA JN",
+    "lat": 29.588632,
+    "lon": 76.109286
+  },
+  {
+    "code": "NS",
+    "name": "Narasapur",
+    "lat": 16.445891,
+    "lon": 81.699909
+  },
+  {
+    "code": "NSS",
+    "name": "Nawanshahr Doaba Junction",
+    "lat": 31.1213,
+    "lon": 76.108571
+  },
+  {
+    "code": "NTSK",
+    "name": "NEW TINSUKIA JN",
+    "lat": 27.479748,
+    "lon": 95.334128
+  },
+  {
+    "code": "NTV",
+    "name": "Nautanwa",
+    "lat": 27.42688,
+    "lon": 83.42129700000001
+  },
+  {
+    "code": "NWP",
+    "name": "NAUPADA JN",
+    "lat": 18.5794097271,
+    "lon": 84.2829220099
+  },
+  {
+    "code": "NZB",
+    "name": "NIZAMABAD",
+    "lat": 18.679164999999998,
+    "lon": 78.103238
+  },
+  {
+    "code": "NZM",
+    "name": "DELHI H NIZAMUDDIN",
+    "lat": 28.587329999999998,
+    "lon": 77.254249
+  },
+  {
+    "code": "OKHA",
+    "name": "OKHA",
+    "lat": 22.470959999999998,
+    "lon": 69.073775
+  },
+  {
+    "code": "ON",
+    "name": "UNNAO JN",
+    "lat": 26.548354,
+    "lon": 80.486199
+  },
+  {
+    "code": "OND",
+    "name": "Aunlajori Junction",
+    "lat": 22.440956,
+    "lon": 86.16420749999999
+  },
+  {
+    "code": "PAK",
+    "name": "PAKALA JN",
+    "lat": 13.451133,
+    "lon": 79.11408
+  },
+  {
+    "code": "PAU",
+    "name": "PURNA JN",
+    "lat": 19.180526999999998,
+    "lon": 77.024985
+  },
+  {
+    "code": "PBE",
+    "name": "PILIBHIT JN",
+    "lat": 28.614977999999997,
+    "lon": 79.813946
+  },
+  {
+    "code": "PBH",
+    "name": "PARTAPGARH JN",
+    "lat": 25.913308,
+    "lon": 82.00177799999999
+  },
+  {
+    "code": "PBM",
+    "name": "PAMBAN JN",
+    "lat": 9.279729,
+    "lon": 79.213482
+  },
+  {
+    "code": "PBN",
+    "name": "PARBHANI JN",
+    "lat": 19.257460000000002,
+    "lon": 76.774119
+  },
+  {
+    "code": "PBR",
+    "name": "PORBANDAR",
+    "lat": 21.643597999999997,
+    "lon": 69.615506
+  },
+  {
+    "code": "PC",
+    "name": "PACHORA JN",
+    "lat": 20.668385,
+    "lon": 75.34831
+  },
+  {
+    "code": "PCC",
+    "name": "Prachi Road Junction",
+    "lat": 20.988298,
+    "lon": 70.68701800000001
+  },
+  {
+    "code": "PDPH",
+    "name": "Padapahar Junction",
+    "lat": 22.156554999999997,
+    "lon": 85.545961
+  },
+  {
+    "code": "PDY",
+    "name": "Puducherry",
+    "lat": 11.925445999999999,
+    "lon": 79.828127
+  },
+  {
+    "code": "PEH",
+    "name": "Pathardih Junction",
+    "lat": 23.675524600000003,
+    "lon": 86.4345602
+  },
+  {
+    "code": "PEP",
+    "name": "PHEPHNA JN",
+    "lat": 25.770309,
+    "lon": 84.05132499999999
+  },
+  {
+    "code": "PFM",
+    "name": "PHAPHAMAU JN",
+    "lat": 25.524255999999998,
+    "lon": 81.866406
+  },
+  {
+    "code": "PGW",
+    "name": "PHAGWARA JN",
+    "lat": 31.217555749800002,
+    "lon": 75.7655019775
+  },
+  {
+    "code": "PHR",
+    "name": "PHILLAUR JN",
+    "lat": 31.016907,
+    "lon": 75.78576100000001
+  },
+  {
+    "code": "PKU",
+    "name": "PANSKURA",
+    "lat": 22.393102763,
+    "lon": 87.7430237079
+  },
+  {
+    "code": "PLC",
+    "name": "Phalodi Junction",
+    "lat": 27.124794,
+    "lon": 72.366743
+  },
+  {
+    "code": "PLCJ",
+    "name": "PHALODI JN",
+    "lat": 27.124914,
+    "lon": 72.36686300000001
+  },
+  {
+    "code": "PLO",
+    "name": "PULGAON JN",
+    "lat": 20.726734,
+    "lon": 78.318111
+  },
+  {
+    "code": "PNBE",
+    "name": "PATNA JN",
+    "lat": 25.60256,
+    "lon": 85.136824
+  },
+  {
+    "code": "PNP",
+    "name": "PANIPAT JN",
+    "lat": 29.388948,
+    "lon": 76.96379300000001
+  },
+  {
+    "code": "PNU",
+    "name": "PALANPUR JN",
+    "lat": 24.174433,
+    "lon": 72.430172
+  },
+  {
+    "code": "POY",
+    "name": "POLLACHI JN",
+    "lat": 10.653079,
+    "lon": 77.001342
+  },
+  {
+    "code": "PPD",
+    "name": "PIPLOD JN",
+    "lat": 22.819148000000002,
+    "lon": 73.9091
+  },
+  {
+    "code": "PPR",
+    "name": "PIPAR ROAD JN",
+    "lat": 26.452849999999998,
+    "lon": 73.448703
+  },
+  {
+    "code": "PRG",
+    "name": "PRAYAG",
+    "lat": 25.467939,
+    "lon": 81.867081
+  },
+  {
+    "code": "PRNA",
+    "name": "PURNIA JN",
+    "lat": 25.790678,
+    "lon": 87.519124
+  },
+  {
+    "code": "PRR",
+    "name": "PURULIA JN",
+    "lat": 23.324911,
+    "lon": 86.37787
+  },
+  {
+    "code": "PRTN",
+    "name": "Pratapnagar",
+    "lat": 22.281143,
+    "lon": 73.210289
+  },
+  {
+    "code": "PTD",
+    "name": "Petlad Junction",
+    "lat": 22.5452909,
+    "lon": 72.9294731
+  },
+  {
+    "code": "PTJ",
+    "name": "PODANUR JN",
+    "lat": 10.965425,
+    "lon": 76.990125
+  },
+  {
+    "code": "PTK",
+    "name": "PATHANKOT",
+    "lat": 32.271804,
+    "lon": 75.644427
+  },
+  {
+    "code": "PTN",
+    "name": "PATAN",
+    "lat": 23.853292,
+    "lon": 72.13167200000001
+  },
+  {
+    "code": "PUNE",
+    "name": "PUNE JN",
+    "lat": 18.529378,
+    "lon": 73.873086
+  },
+  {
+    "code": "PURI",
+    "name": "PURI",
+    "lat": 19.811459000000003,
+    "lon": 85.839992
+  },
+  {
+    "code": "PUU",
+    "name": "Punalur",
+    "lat": 9.023336,
+    "lon": 76.916104
+  },
+  {
+    "code": "QLN",
+    "name": "KOLLAM JN",
+    "lat": 8.886586000000001,
+    "lon": 76.59675299999999
+  },
+  {
+    "code": "RBL",
+    "name": "RAE BARELI JN",
+    "lat": 26.232684,
+    "lon": 81.23932
+  },
+  {
+    "code": "RDP",
+    "name": "Radhikapur",
+    "lat": 25.643573999999997,
+    "lon": 88.448153
+  },
+  {
+    "code": "RE",
+    "name": "REWARI",
+    "lat": 28.202779000000003,
+    "lon": 76.609414
+  },
+  {
+    "code": "REWA",
+    "name": "REWA",
+    "lat": 24.537122,
+    "lon": 81.250615
+  },
+  {
+    "code": "RGD",
+    "name": "Rajgir",
+    "lat": 25.033068999999998,
+    "lon": 85.41469699999999
+  },
+  {
+    "code": "RGDA",
+    "name": "RAYAGADA",
+    "lat": 19.175642,
+    "lon": 83.410505
+  },
+  {
+    "code": "RGS",
+    "name": "Ringas Junction",
+    "lat": 27.373379,
+    "lon": 75.56360400000001
+  },
+  {
+    "code": "RHA",
+    "name": "Ranaghat Junction",
+    "lat": 23.173344,
+    "lon": 88.568184
+  },
+  {
+    "code": "RJL",
+    "name": "Rajmahal",
+    "lat": 25.052535,
+    "lon": 87.831451
+  },
+  {
+    "code": "RJPB",
+    "name": "RAJENDRA NAGAR BIHAR",
+    "lat": 25.603351,
+    "lon": 85.162449
+  },
+  {
+    "code": "RJT",
+    "name": "RAJKOT JN",
+    "lat": 22.312206,
+    "lon": 70.803446
+  },
+  {
+    "code": "RJY",
+    "name": "RAJAMUNDRY",
+    "lat": 16.984159000000002,
+    "lon": 81.783901
+  },
+  {
+    "code": "RKI",
+    "name": "RAMKANALI JN",
+    "lat": 23.579891,
+    "lon": 86.76233599999999
+  },
+  {
+    "code": "RKSH",
+    "name": "RISHIKESH",
+    "lat": 30.107173,
+    "lon": 78.287498
+  },
+  {
+    "code": "RKSN",
+    "name": "RAJKHARSAWAN JN",
+    "lat": 22.733525,
+    "lon": 85.811158
+  },
+  {
+    "code": "RLA",
+    "name": "RAJULA JN",
+    "lat": 21.103699,
+    "lon": 71.479251
+  },
+  {
+    "code": "RMM",
+    "name": "RAMESWARAM",
+    "lat": 9.280973,
+    "lon": 79.306787
+  },
+  {
+    "code": "RMR",
+    "name": "RAMNAGAR",
+    "lat": 29.390223,
+    "lon": 79.12223900000001
+  },
+  {
+    "code": "RNC",
+    "name": "RANCHI",
+    "lat": 23.348811,
+    "lon": 85.33352
+  },
+  {
+    "code": "RNY",
+    "name": "RANGIYA JN",
+    "lat": 26.447900999999998,
+    "lon": 91.605929
+  },
+  {
+    "code": "ROK",
+    "name": "ROHTAK JN",
+    "lat": 28.890904,
+    "lon": 76.57955000000001
+  },
+  {
+    "code": "ROP",
+    "name": "RUPSA JN",
+    "lat": 21.621995,
+    "lon": 87.018507
+  },
+  {
+    "code": "ROU",
+    "name": "ROURKELA",
+    "lat": 22.22844,
+    "lon": 84.86313200000001
+  },
+  {
+    "code": "ROZA",
+    "name": "ROZA JN",
+    "lat": 27.853121,
+    "lon": 79.956038
+  },
+  {
+    "code": "RPH",
+    "name": "RAMPUR HAT",
+    "lat": 24.179797,
+    "lon": 87.78214700000001
+  },
+  {
+    "code": "RPHR",
+    "name": "Raipur Hariyana Junction",
+    "lat": 29.158401,
+    "lon": 75.772834
+  },
+  {
+    "code": "RPJ",
+    "name": "RAJPURA JN",
+    "lat": 30.486458949,
+    "lon": 76.5940201901
+  },
+  {
+    "code": "RRB",
+    "name": "BIRUR JN",
+    "lat": 13.591101,
+    "lon": 75.974749
+  },
+  {
+    "code": "RTGH",
+    "name": "Ratangarh Junction",
+    "lat": 28.0665867073,
+    "lon": 74.6236025668
+  },
+  {
+    "code": "RTLM",
+    "name": "RATLAM JN",
+    "lat": 23.340239999999998,
+    "lon": 75.050686
+  },
+  {
+    "code": "RTM",
+    "name": "RATLAM JN",
+    "lat": 23.34038,
+    "lon": 75.050826
+  },
+  {
+    "code": "RU",
+    "name": "RENIGUNTA JN",
+    "lat": 13.636261,
+    "lon": 79.50628999999999
+  },
+  {
+    "code": "RXL",
+    "name": "RAXAUL JN",
+    "lat": 26.987018000000003,
+    "lon": 84.84456399999999
+  },
+  {
+    "code": "SA",
+    "name": "SALEM JN",
+    "lat": 11.671726000000001,
+    "lon": 78.113415
+  },
+  {
+    "code": "SBC",
+    "name": "BANGALORE CITY JN",
+    "lat": 12.977595,
+    "lon": 77.56808299999999
+  },
+  {
+    "code": "SBE",
+    "name": "SORBHOG JN",
+    "lat": 26.494286000000002,
+    "lon": 90.88828099999999
+  },
+  {
+    "code": "SBG",
+    "name": "SAHIBGANJ JN",
+    "lat": 25.241391999999998,
+    "lon": 87.63457700000001
+  },
+  {
+    "code": "SBI",
+    "name": "SABARMATI JN",
+    "lat": 23.072985,
+    "lon": 72.587162
+  },
+  {
+    "code": "SBP",
+    "name": "SAMBALPUR",
+    "lat": 21.4830514376,
+    "lon": 83.9603252667
+  },
+  {
+    "code": "SBT",
+    "name": "SABARMATI JN",
+    "lat": 23.077545999999998,
+    "lon": 72.58928200000001
+  },
+  {
+    "code": "SC",
+    "name": "SECUNDERABAD JN",
+    "lat": 17.433146999999998,
+    "lon": 78.50148100000001
+  },
+  {
+    "code": "SCC",
+    "name": "SITAPUR CANT",
+    "lat": 27.559468,
+    "lon": 80.698784
+  },
+  {
+    "code": "SCE",
+    "name": "Senchoa Junction",
+    "lat": 26.3116130653,
+    "lon": 92.6424819141
+  },
+  {
+    "code": "SCL",
+    "name": "SILCHAR",
+    "lat": 24.830337999999998,
+    "lon": 92.786795
+  },
+  {
+    "code": "SCT",
+    "name": "SENGOTTAI",
+    "lat": 8.9874125,
+    "lon": 77.24185
+  },
+  {
+    "code": "SDAH",
+    "name": "KOLKATA SEALDAH",
+    "lat": 22.566758,
+    "lon": 88.374713
+  },
+  {
+    "code": "SDLP",
+    "name": "Sadulpur Junction",
+    "lat": 28.631138,
+    "lon": 75.386989
+  },
+  {
+    "code": "SEE",
+    "name": "SONPUR JN",
+    "lat": 25.696849,
+    "lon": 85.16685100000001
+  },
+  {
+    "code": "SGL",
+    "name": "SAGAULI JN",
+    "lat": 26.758187,
+    "lon": 84.73934
+  },
+  {
+    "code": "SGNR",
+    "name": "SHRI GANGANAGAR",
+    "lat": 29.931792,
+    "lon": 73.87141700000001
+  },
+  {
+    "code": "SGRL",
+    "name": "SINGRAULI",
+    "lat": 24.204257000000002,
+    "lon": 82.642735
+  },
+  {
+    "code": "SGUJ",
+    "name": "SILIGURI JN",
+    "lat": 26.723204,
+    "lon": 88.413663
+  },
+  {
+    "code": "SHC",
+    "name": "SAHARSA JN",
+    "lat": 25.875207999999997,
+    "lon": 86.594953
+  },
+  {
+    "code": "SHG",
+    "name": "SHAHGANJ JN",
+    "lat": 26.061399,
+    "lon": 82.679662
+  },
+  {
+    "code": "SHH",
+    "name": "SHAPUR JN",
+    "lat": 21.478281,
+    "lon": 70.37105700000001
+  },
+  {
+    "code": "SHM",
+    "name": "KOLKATA SHALIMAR",
+    "lat": 22.555508,
+    "lon": 88.315615
+  },
+  {
+    "code": "SIKR",
+    "name": "Sikar Junction",
+    "lat": 27.616275,
+    "lon": 75.15337799999999
+  },
+  {
+    "code": "SINI",
+    "name": "SINI JN",
+    "lat": 22.78946,
+    "lon": 85.94702600000001
+  },
+  {
+    "code": "SIOB",
+    "name": "SAMAKHIALI JN",
+    "lat": 23.309819,
+    "lon": 70.503394
+  },
+  {
+    "code": "SIR",
+    "name": "SIRHIND JN",
+    "lat": 30.624222,
+    "lon": 76.383194
+  },
+  {
+    "code": "SKB",
+    "name": "SHIKOHABAD JN",
+    "lat": 27.085686,
+    "lon": 78.57495499999999
+  },
+  {
+    "code": "SKI",
+    "name": "SAKRI JN",
+    "lat": 26.208947000000002,
+    "lon": 86.078137
+  },
+  {
+    "code": "SKJ",
+    "name": "SAHIBPUR KAMAL JN",
+    "lat": 25.4270372397,
+    "lon": 86.4001292639
+  },
+  {
+    "code": "SLGR",
+    "name": "SIMALUGURI JN",
+    "lat": 26.917281,
+    "lon": 94.756816
+  },
+  {
+    "code": "SLJ",
+    "name": "SAKRIGALI JN",
+    "lat": 25.243358999999998,
+    "lon": 87.715967
+  },
+  {
+    "code": "SLN",
+    "name": "SULTANPUR",
+    "lat": 26.263027,
+    "lon": 82.066106
+  },
+  {
+    "code": "SLO",
+    "name": "SAMALKOT JN",
+    "lat": 17.044827,
+    "lon": 82.168724
+  },
+  {
+    "code": "SMET",
+    "name": "Shimoga Town",
+    "lat": 13.943036999999999,
+    "lon": 75.583174
+  },
+  {
+    "code": "SMI",
+    "name": "SITAMARHI JN",
+    "lat": 26.594374000000002,
+    "lon": 85.504707
+  },
+  {
+    "code": "SML",
+    "name": "Shimla",
+    "lat": 31.102794,
+    "lon": 77.159932
+  },
+  {
+    "code": "SMLA",
+    "name": "SAMLAYA JN",
+    "lat": 22.483966,
+    "lon": 73.302104
+  },
+  {
+    "code": "SMNH",
+    "name": "SOMNATH",
+    "lat": 20.896131999999998,
+    "lon": 70.408254
+  },
+  {
+    "code": "SMQL",
+    "name": "SHAMLI",
+    "lat": 29.444596999999998,
+    "lon": 77.316231
+  },
+  {
+    "code": "SMR",
+    "name": "SAMDHARI JN",
+    "lat": 25.837202,
+    "lon": 72.57300699999999
+  },
+  {
+    "code": "SNDT",
+    "name": "Sindri Town",
+    "lat": 23.660992,
+    "lon": 86.47988299999999
+  },
+  {
+    "code": "SNSI",
+    "name": "SAINAGAR SHIRDI",
+    "lat": 19.780792299999998,
+    "lon": 74.4806877
+  },
+  {
+    "code": "SOG",
+    "name": "SURATGARH JN",
+    "lat": 29.324152,
+    "lon": 73.90724800000001
+  },
+  {
+    "code": "SONR",
+    "name": "Saoner Junction",
+    "lat": 21.387489000000002,
+    "lon": 78.925046
+  },
+  {
+    "code": "SPE",
+    "name": "SULLURUPETA",
+    "lat": 13.696463,
+    "lon": 80.018161
+  },
+  {
+    "code": "SPJ",
+    "name": "SAMASTIPUR JN",
+    "lat": 25.858304,
+    "lon": 85.78736
+  },
+  {
+    "code": "SPR",
+    "name": "Sonarpur Junction",
+    "lat": 22.443359,
+    "lon": 88.429773
+  },
+  {
+    "code": "SRC",
+    "name": "SANTRAGACHI JN",
+    "lat": 22.58393,
+    "lon": 88.284011
+  },
+  {
+    "code": "SRE",
+    "name": "SAHARANPUR",
+    "lat": 29.960529,
+    "lon": 77.54173899999999
+  },
+  {
+    "code": "SRPR",
+    "name": "SARUPSAR JN",
+    "lat": 29.353194,
+    "lon": 73.694891
+  },
+  {
+    "code": "SRR",
+    "name": "SHORANUR JN",
+    "lat": 10.758854999999999,
+    "lon": 76.27219600000001
+  },
+  {
+    "code": "SRU",
+    "name": "SALEMPUR JN",
+    "lat": 26.298048,
+    "lon": 83.923271
+  },
+  {
+    "code": "ST",
+    "name": "SURAT",
+    "lat": 21.206568,
+    "lon": 72.840793
+  },
+  {
+    "code": "STA",
+    "name": "SATNA",
+    "lat": 24.568619,
+    "lon": 80.827717
+  },
+  {
+    "code": "SUR",
+    "name": "SOLAPUR JN",
+    "lat": 17.664496,
+    "lon": 75.893401
+  },
+  {
+    "code": "SV",
+    "name": "SIWAN JN",
+    "lat": 26.210724000000003,
+    "lon": 84.359267
+  },
+  {
+    "code": "SZP",
+    "name": "Shahjahanpur",
+    "lat": 27.893402000000002,
+    "lon": 79.904536
+  },
+  {
+    "code": "TALL",
+    "name": "TALL JN",
+    "lat": 25.3787000521,
+    "lon": 85.9546829749
+  },
+  {
+    "code": "TATA",
+    "name": "TATANAGAR JN",
+    "lat": 22.768954,
+    "lon": 86.20056000000001
+  },
+  {
+    "code": "TAV",
+    "name": "Talala Junction",
+    "lat": 21.04184,
+    "lon": 70.522164
+  },
+  {
+    "code": "TBD",
+    "name": "Telibandha",
+    "lat": 21.235642,
+    "lon": 81.67053
+  },
+  {
+    "code": "TBM",
+    "name": "TAMBARAM",
+    "lat": 12.926035689399999,
+    "lon": 80.1191573807
+  },
+  {
+    "code": "TCN",
+    "name": "Tiruchendur",
+    "lat": 8.501774,
+    "lon": 78.117118
+  },
+  {
+    "code": "TDL",
+    "name": "TUNDLA JN",
+    "lat": 27.207747,
+    "lon": 78.233285
+  },
+  {
+    "code": "TEL",
+    "name": "TENALI JN",
+    "lat": 16.242409000000002,
+    "lon": 80.640413
+  },
+  {
+    "code": "TEN",
+    "name": "TIRUNELVELI",
+    "lat": 8.73636,
+    "lon": 77.707979
+  },
+  {
+    "code": "THAN",
+    "name": "THAN JN",
+    "lat": 22.578960000000002,
+    "lon": 71.20653300000001
+  },
+  {
+    "code": "THB",
+    "name": "THANA BIHPUR JN",
+    "lat": 25.393571,
+    "lon": 86.934758
+  },
+  {
+    "code": "THE",
+    "name": "Thawe Junction",
+    "lat": 26.438991,
+    "lon": 84.394398
+  },
+  {
+    "code": "TKE",
+    "name": "Tarikere Junction",
+    "lat": 13.710886,
+    "lon": 75.812209
+  },
+  {
+    "code": "TKJ",
+    "name": "TILAK BRIDGE",
+    "lat": 28.627633,
+    "lon": 77.237995
+  },
+  {
+    "code": "TN",
+    "name": "TUTICORIN",
+    "lat": 8.806109000000001,
+    "lon": 78.15535899999999
+  },
+  {
+    "code": "TPH",
+    "name": "TINPAHAR JN",
+    "lat": 24.996925863999998,
+    "lon": 87.7438070306
+  },
+  {
+    "code": "TPJ",
+    "name": "TIRUCHIRAPPALLI",
+    "lat": 10.794067,
+    "lon": 78.685355
+  },
+  {
+    "code": "TPT",
+    "name": "TIRUPATTUR JN",
+    "lat": 12.497951,
+    "lon": 78.561419
+  },
+  {
+    "code": "TPTY",
+    "name": "TIRUPATI MAIN",
+    "lat": 13.62763,
+    "lon": 79.418968
+  },
+  {
+    "code": "TPU",
+    "name": "Tanakpur",
+    "lat": 29.067103,
+    "lon": 80.10904500000001
+  },
+  {
+    "code": "TPZ",
+    "name": "TAPRI JN",
+    "lat": 29.915727999999998,
+    "lon": 77.58327200000001
+  },
+  {
+    "code": "TRT",
+    "name": "TIRUTTANI",
+    "lat": 13.179217000000001,
+    "lon": 79.611386
+  },
+  {
+    "code": "TSI",
+    "name": "TENKASI JN",
+    "lat": 8.963993,
+    "lon": 77.30733799999999
+  },
+  {
+    "code": "TSK",
+    "name": "Tinsukia Junction",
+    "lat": 27.4864,
+    "lon": 95.356367
+  },
+  {
+    "code": "TVC",
+    "name": "TRIVANDRUM CENTRAL",
+    "lat": 8.486679,
+    "lon": 76.95120999999999
+  },
+  {
+    "code": "TVR",
+    "name": "THIRUVARUR JN",
+    "lat": 10.764347,
+    "lon": 79.63389799999999
+  },
+  {
+    "code": "UAM",
+    "name": "Udagamandalam",
+    "lat": 11.404584999999999,
+    "lon": 76.694727
+  },
+  {
+    "code": "UBL",
+    "name": "HUBLI JN",
+    "lat": 15.350302000000001,
+    "lon": 75.148104
+  },
+  {
+    "code": "UCR",
+    "name": "Unchahar Junction",
+    "lat": 25.902315,
+    "lon": 81.30014299999999
+  },
+  {
+    "code": "UDL",
+    "name": "ANDAL JN",
+    "lat": 23.579012000000002,
+    "lon": 87.181194
+  },
+  {
+    "code": "UDN",
+    "name": "UDHNA JN",
+    "lat": 21.171156,
+    "lon": 72.851461
+  },
+  {
+    "code": "UDZ",
+    "name": "UDAIPUR CITY",
+    "lat": 24.566862,
+    "lon": 73.699632
+  },
+  {
+    "code": "UHL",
+    "name": "Una Himachal",
+    "lat": 31.478782000000002,
+    "lon": 76.27566
+  },
+  {
+    "code": "UHP",
+    "name": "UDHAMPUR",
+    "lat": 32.92664,
+    "lon": 75.154881
+  },
+  {
+    "code": "UJN",
+    "name": "UJJAIN JN",
+    "lat": 23.178154,
+    "lon": 75.781403
+  },
+  {
+    "code": "UMB",
+    "name": "AMBALA CANT JN",
+    "lat": 30.338918,
+    "lon": 76.826966
+  },
+  {
+    "code": "VAA",
+    "name": "Bhaga Junction",
+    "lat": 23.723330999999998,
+    "lon": 86.405555
+  },
+  {
+    "code": "VDA",
+    "name": "VASAD JN",
+    "lat": 22.452351,
+    "lon": 73.05999100000001
+  },
+  {
+    "code": "VG",
+    "name": "VIRAMGAM JN",
+    "lat": 23.129098,
+    "lon": 72.052968
+  },
+  {
+    "code": "VKA",
+    "name": "Verka Junction",
+    "lat": 31.665699,
+    "lon": 74.931669
+  },
+  {
+    "code": "VKB",
+    "name": "VIKARABAD JN",
+    "lat": 17.337132,
+    "lon": 77.90940900000001
+  },
+  {
+    "code": "VLCY",
+    "name": "Velachery",
+    "lat": 12.967092000000001,
+    "lon": 80.21921699999999
+  },
+  {
+    "code": "VM",
+    "name": "VILLUPURAM JN",
+    "lat": 11.942971,
+    "lon": 79.500101
+  },
+  {
+    "code": "VPT",
+    "name": "VIRUDUNAGAR JN",
+    "lat": 9.596405,
+    "lon": 77.95773700000001
+  },
+  {
+    "code": "VR",
+    "name": "VIRAR",
+    "lat": 19.454407,
+    "lon": 72.811737
+  },
+  {
+    "code": "VRI",
+    "name": "VRIDHACHALAM JN",
+    "lat": 11.534965,
+    "lon": 79.316073
+  },
+  {
+    "code": "VRL",
+    "name": "VERAVAL",
+    "lat": 20.913351,
+    "lon": 70.370689
+  },
+  {
+    "code": "VSG",
+    "name": "VASCO DA GAMA",
+    "lat": 15.397241000000001,
+    "lon": 73.813425
+  },
+  {
+    "code": "VSKP",
+    "name": "VISHAKAPATNAM",
+    "lat": 17.72159,
+    "lon": 83.289514
+  },
+  {
+    "code": "VZM",
+    "name": "VIZIANAGRAM JN",
+    "lat": 18.111374,
+    "lon": 83.39558600000001
+  },
+  {
+    "code": "WGI",
+    "name": "Waghai",
+    "lat": 20.772638155885446,
+    "lon": 73.50047372281551
+  },
+  {
+    "code": "WJR",
+    "name": "WALAJAH ROAD JN",
+    "lat": 12.970676,
+    "lon": 79.360511
+  },
+  {
+    "code": "WKR",
+    "name": "WANKANER JN",
+    "lat": 22.622552,
+    "lon": 70.96561700000001
+  },
+  {
+    "code": "WR",
+    "name": "WARDHA JN",
+    "lat": 20.732777,
+    "lon": 78.594157
+  },
+  {
+    "code": "YNK",
+    "name": "YELHANKA JN",
+    "lat": 13.102795,
+    "lon": 77.593069
+  },
+  {
+    "code": "YPR",
+    "name": "YESVANTPUR JN",
+    "lat": 13.022839000000001,
+    "lon": 77.55117399999999
+  },
+  {
+    "code": "ZBD",
+    "name": "ZAFARABAD JN",
+    "lat": 25.708436,
+    "lon": 82.719014
+  }
+]

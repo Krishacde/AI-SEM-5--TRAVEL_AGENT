@@ -4,6 +4,57 @@ const esc = val => String(val ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":
 const selectedInterests = new Set();
 const selectedDestinations = new Map();
 let currentCandidateCards = [];
+let discoveryController = null;
+
+function localDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getDiscoveryDates() {
+  const startDate = discover$("discoverStartDate").value;
+  const endDate = discover$("discoverEndDate").value;
+  if (!startDate || !endDate) return null;
+
+  const start = new Date(`${startDate}T12:00:00`);
+  const end = new Date(`${endDate}T12:00:00`);
+  const days = Math.floor((end - start) / 86400000) + 1;
+  return { startDate, endDate, days };
+}
+
+function syncDiscoveryDateLimits() {
+  const startInput = discover$("discoverStartDate");
+  const endInput = discover$("discoverEndDate");
+  if (!startInput || !endInput) return;
+  const today = localDateString(new Date());
+  if (!startInput.value) {
+    const defaultStart = new Date();
+    defaultStart.setDate(defaultStart.getDate() + 7);
+    startInput.value = localDateString(defaultStart);
+  }
+  startInput.min = today;
+  endInput.min = startInput.value;
+  if (!endInput.value || endInput.value < startInput.value) {
+    const defaultEnd = new Date(`${startInput.value}T12:00:00`);
+    defaultEnd.setDate(defaultEnd.getDate() + 4);
+    endInput.value = localDateString(defaultEnd);
+  }
+
+  const selectedStart = new Date(`${startInput.value}T12:00:00`);
+  const monthSelect = discover$("discoverMonth");
+  const yearSelect = discover$("discoverYear");
+  if (monthSelect) {
+    monthSelect.value = selectedStart.toLocaleString("en-US", { month: "long" });
+  }
+  if (yearSelect && Array.from(yearSelect.options).some(option => option.value === String(selectedStart.getFullYear()))) {
+    yearSelect.value = String(selectedStart.getFullYear());
+  }
+}
+
+syncDiscoveryDateLimits();
+discover$("discoverStartDate")?.addEventListener("change", syncDiscoveryDateLimits);
 
 // Interest toggle buttons
 discover$("discoverInterests")?.addEventListener("click", event => {
@@ -152,6 +203,12 @@ function goToTripPlanner(cardsToPlan) {
   const origin = discover$("discoverOrigin").value.trim();
   const month = discover$("discoverMonth").value;
   const year = discover$("discoverYear").value || "2026";
+  const dates = getDiscoveryDates();
+  const days = dates?.days;
+  if (!dates || !Number.isInteger(days) || days < 1 || days > 30) {
+    alert("Please select a valid start and end date within 30 days.");
+    return;
+  }
   const pace = discover$("discoverPace")?.value || "balanced";
   const budget = discover$("discoverBudget")?.value === "flexible" ? "" : (discover$("discoverBudget")?.value || "");
   const destList = cardsToPlan.map(c => c.name).join(", ");
@@ -162,6 +219,8 @@ function goToTripPlanner(cardsToPlan) {
     sessionStorage.setItem("tripmate_discovery_origin", origin);
     sessionStorage.setItem("tripmate_discovery_month", month);
     sessionStorage.setItem("tripmate_discovery_year", year);
+    sessionStorage.setItem("tripmate_discovery_start_date", dates.startDate);
+    sessionStorage.setItem("tripmate_discovery_end_date", dates.endDate);
   } catch (e) {}
 
   const params = new URLSearchParams({
@@ -169,6 +228,9 @@ function goToTripPlanner(cardsToPlan) {
     origin: origin,
     month: month,
     year: year,
+    start_date: dates.startDate,
+    end_date: dates.endDate,
+    days: String(days),
     pace: pace,
     budget: budget,
     from_discovery: "true",
@@ -233,12 +295,18 @@ discover$("detailsModal")?.addEventListener("click", event => {
   }
 });
 
+discover$("discoverCancelBtn")?.addEventListener("click", () => {
+  discoveryController?.abort();
+});
+
 // SUBMISSION HANDLER
 discover$("discoveryForm").onsubmit = async event => {
   event.preventDefault();
   const origin = discover$("discoverOrigin").value.trim();
   const month = discover$("discoverMonth").value;
   const year = Number(discover$("discoverYear").value) || 2026;
+  const dates = getDiscoveryDates();
+  const days = dates?.days;
   const pace = discover$("discoverPace")?.value || "balanced";
   const budget = discover$("discoverBudget")?.value === "flexible" ? null : Number(discover$("discoverBudget")?.value);
 
@@ -246,9 +314,16 @@ discover$("discoveryForm").onsubmit = async event => {
     alert("Please enter a starting location.");
     return;
   }
+  if (!dates || !Number.isInteger(days) || days < 1 || days > 30) {
+    alert("Please select a valid start and end date within 30 days.");
+    return;
+  }
 
   const submitBtn = discover$("discoverSubmitBtn");
+  const cancelBtn = discover$("discoverCancelBtn");
+  discoveryController = new AbortController();
   submitBtn.disabled = true;
+  cancelBtn.classList.remove("hidden");
   submitBtn.innerHTML = '<span class="loader"></span> Scouting Destinations...';
 
   const progressSection = discover$("discoverProgress");
@@ -259,7 +334,7 @@ discover$("discoveryForm").onsubmit = async event => {
   resultsSection.classList.add("hidden");
 
   statusContainer.innerHTML = `
-    <div class="progress-active"><span><span class="loader"></span></span> 1. Nearby Destination Agent: Scouting destinations near ${esc(origin)}...</div>
+    <div class="progress-active"><span><span class="loader"></span></span> 1. Nearby Destination Agent: Scouting destinations near ${esc(origin)} for ${days} days...</div>
     <div><span>⋯</span> 2. Seasonal Event Agent: Verifying events for ${esc(month)} ${year}...</div>
     <div><span>⋯</span> 3. Weather Agent: Analyzing monthly climate expectations...</div>
     <div><span>⋯</span> 4. Destination Research Agent: Checking travel connectivity & attractions...</div>
@@ -271,6 +346,9 @@ discover$("discoveryForm").onsubmit = async event => {
       origin,
       month,
       year,
+      start_date: dates.startDate,
+      end_date: dates.endDate,
+      days,
       interests: Array.from(selectedInterests),
       pace,
       budget,
@@ -280,7 +358,8 @@ discover$("discoveryForm").onsubmit = async event => {
     const response = await fetch("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: discoveryController.signal
     });
 
     const data = await response.json();
@@ -304,10 +383,14 @@ discover$("discoveryForm").onsubmit = async event => {
     resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
 
   } catch (error) {
-    statusContainer.innerHTML = `<div class="error">${esc(error.message)}</div>`;
+    statusContainer.innerHTML = error.name === "AbortError"
+      ? '<div class="error">Research paused. You can start it again when ready.</div>'
+      : `<div class="error">${esc(error.message)}</div>`;
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = 'Scout Destinations <span>→</span>';
+    cancelBtn.classList.add("hidden");
+    discoveryController = null;
   }
 };
 

@@ -5,6 +5,7 @@ let selectedFlight = null;
 let selectedTrain = null;
 let selectedHotel = null;
 let selectedCab = null;
+let tripController = null;
 
 const $ = id => document.getElementById(id);
 const esc = x => String(x ?? "Information unavailable").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
@@ -444,7 +445,30 @@ function renderTrainCards(trains) {
 
   // Handle a single error/unavailable entry returned by search_trains() on failure
   if (trains.length === 1 && (trains[0].status === 'UNAVAILABLE' || trains[0].message)) {
-    const msg = trains[0].message || trains[0].status || 'Train search unavailable for this route.';
+    const unavailable = trains[0];
+    const alternates = Array.isArray(unavailable.alternate_dates)
+      ? unavailable.alternate_dates
+      : [];
+    if (alternates.length && unavailable.date) {
+      const requestedDate = new Date(`${unavailable.date}T12:00:00`);
+      const requestedLabel = `${requestedDate.toLocaleDateString("en", { weekday: "short" })}, ${requestedDate.getDate()} ${requestedDate.toLocaleDateString("en", { month: "short" })}`;
+      const alternateLines = alternates.map(alternate => {
+        const alternateDate = new Date(`${alternate.date}T12:00:00`);
+        const label = `${esc(alternate.weekday || alternateDate.toLocaleDateString("en", { weekday: "short" }))} ${alternateDate.getDate()} ${alternateDate.toLocaleDateString("en", { month: "short" })}`;
+        const available = Array.isArray(alternate.trains) ? alternate.trains : [];
+        const trainNames = available.map(train => `${train.number || "?"} ${train.name || "Unknown train"}`).join(", ");
+        const count = available.length;
+        return `<li>${label} - ${count} train${count === 1 ? "" : "s"}: ${esc(trainNames)}</li>`;
+      }).join("");
+      return `
+        <div class="empty-notice train-error-notice">
+          <span>No trains on ${esc(requestedLabel)}. Trains on this route run on:</span>
+          <ul>${alternateLines}</ul>
+        </div>
+      `;
+    }
+
+    const msg = unavailable.message || unavailable.status || 'Train search unavailable for this route.';
     return `
       <div class="empty-notice train-error-notice">
         <span style="font-size:1.2em">⚠️</span>
@@ -817,7 +841,10 @@ function renderProgress(items, activeLabel = "") {
 $("tripForm").onsubmit = async event => {
   event.preventDefault();
   const submitButton = $("planSubmitBtn");
+  const cancelButton = $("planCancelBtn");
+  tripController = new AbortController();
   submitButton.disabled = true;
+  cancelButton.classList.remove("hidden");
   submitButton.innerHTML = '<span class="loader"></span> Researching with Multi-Agent Graph...';
 
   const destText = $("destination").value.trim();
@@ -852,7 +879,8 @@ $("tripForm").onsubmit = async event => {
     const response = await fetch("/api/trips", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: tripController.signal
     });
 
     const data = await response.json();
@@ -865,12 +893,20 @@ $("tripForm").onsubmit = async event => {
     $("resultSection").scrollIntoView({ behavior: "smooth", block: "start" });
 
   } catch (error) {
-    $("progressList").innerHTML = `<div class="error">${esc(error.message)}</div>`;
+    $("progressList").innerHTML = error.name === "AbortError"
+      ? '<div class="error">Research paused. You can start it again when ready.</div>'
+      : `<div class="error">${esc(error.message)}</div>`;
   } finally {
     submitButton.disabled = false;
     submitButton.innerHTML = 'Generate Multi-Agent Trip Plan <span>→</span>';
+    cancelButton.classList.add("hidden");
+    tripController = null;
   }
 };
+
+$("planCancelBtn")?.addEventListener("click", () => {
+  tripController?.abort();
+});
 
 // -------------------------------------------------------------
 // REPLANNING AGENT INTERACTION (WITH DYNAMIC HOTEL SEARCH SUPPORT)
@@ -1040,10 +1076,21 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const urlParams = new URLSearchParams(window.location.search);
   const fromDiscovery = urlParams.get("from_discovery") === "true";
+  let storedStartDate = "";
+  let storedEndDate = "";
+  if (fromDiscovery) {
+    try {
+      storedStartDate = sessionStorage.getItem("tripmate_discovery_start_date") || "";
+      storedEndDate = sessionStorage.getItem("tripmate_discovery_end_date") || "";
+    } catch (e) {}
+  }
   const destParam = urlParams.get("destination");
   const originParam = urlParams.get("origin");
   const monthParam = urlParams.get("month");
   const yearParam = urlParams.get("year") || "2026";
+  const startDateParam = urlParams.get("start_date") || urlParams.get("startDate") || storedStartDate;
+  const endDateParam = urlParams.get("end_date") || urlParams.get("endDate") || storedEndDate;
+  const daysParam = Number(urlParams.get("days")) || 5;
   const paceParam = urlParams.get("pace");
   const budgetParam = urlParams.get("budget");
   const autostart = urlParams.get("autostart") === "true";
@@ -1054,13 +1101,17 @@ window.addEventListener("DOMContentLoaded", () => {
     if (paceParam) $("pace").value = paceParam;
     if (budgetParam) $("budget").value = budgetParam;
 
-    if (monthParam) {
+    if (startDateParam && endDateParam) {
+      $("startDate").value = startDateParam;
+      $("endDate").value = endDateParam;
+    } else if (monthParam) {
       const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
       const mIdx = monthNames.indexOf(monthParam);
       if (mIdx !== -1) {
         const mm = String(mIdx + 1).padStart(2, "0");
         $("startDate").value = `${yearParam}-${mm}-10`;
-        $("endDate").value = `${yearParam}-${mm}-14`;
+        const endDate = new Date(Number(yearParam), mIdx, 10 + daysParam - 1);
+        $("endDate").value = endDate.toISOString().split("T")[0];
       }
     } else {
       const tomorrow = new Date();
