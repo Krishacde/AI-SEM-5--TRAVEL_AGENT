@@ -2,6 +2,7 @@ let mode = "known";
 let selectedInterests = new Set();
 let latestTrip = null;
 let selectedFlight = null;
+let selectedTrain = null;
 let selectedHotel = null;
 let selectedCab = null;
 let tripController = null;
@@ -52,6 +53,13 @@ function parseCurrencyNum(val) {
   if (!val) return 0;
   const clean = String(val).replace(/[^0-9.]/g, "");
   return Number(clean) || 0;
+}
+
+function sameTrainOption(a, b) {
+  return Boolean(a && b
+    && a.train_number === b.train_number
+    && a.departure_station_code === b.departure_station_code
+    && a.arrival_station_code === b.arrival_station_code);
 }
 
 function buildTripViewModel(payload, response) {
@@ -154,6 +162,13 @@ function buildTripViewModel(payload, response) {
       ...f,
       price_num: parseCurrencyNum(f.price || f.estimated_cost) || (6500 + i * 1200)
     })) : fallbackFlights,
+    trains: Array.isArray(response.trains)
+      ? response.trains.map(t => ({
+          ...t,
+          price_num: t.price_num,
+          price_status: t.price_status
+        }))
+      : [],
     hotels: (response.hotels && response.hotels.length > 0) ? response.hotels.map((h, i) => ({
       ...h,
       total_num: parseCurrencyNum(h.total_price || h.price_num || h.price) || (12000 + i * 3500)
@@ -201,6 +216,46 @@ function toggleFlightSelection(index) {
     });
     
     showToast(`✓ ${flight.airline} added to your Day 1 itinerary!`);
+  }
+  
+  renderTrip(latestTrip);
+}
+
+function toggleTrainSelection(index) {
+  if (!latestTrip) return;
+  const train = latestTrip.trains[index];
+  
+  if (sameTrainOption(selectedTrain, train)) {
+    selectedTrain = null;
+    latestTrip.itinerary_items = latestTrip.itinerary_items.filter(act => !act.is_train_entry);
+    showToast("Train removed from itinerary.");
+  } else {
+    selectedTrain = train;
+    latestTrip.itinerary_items = latestTrip.itinerary_items.filter(act => !act.is_train_entry);
+
+    const depDate = latestTrip.request.start_date;
+    const trainPrice = Number.isFinite(train.price_num) ? train.price_num : null;
+    const classesText = Array.isArray(train.available_classes) && train.available_classes.length > 0 
+      ? train.available_classes.join(" · ") 
+      : (train.available_classes || "AC / Sleeper");
+
+    latestTrip.itinerary_items.unshift({
+      date: depDate,
+      start_time: train.departure_time || "16:55",
+      end_time: train.arrival_time || "08:35",
+      title: `🚆 Confirmed Train: ${train.train_name} (${train.train_number})`,
+      location: `${train.departure_station || latestTrip.request.origin} → ${train.arrival_station || latestTrip.selected_destination}`,
+      description: `Confirmed rail booking. Classes available: ${classesText}. Duration: ${train.duration || "On schedule"}.`,
+      reason: "Confirmed Rail Booking",
+      status: "VERIFIED",
+      cost: trainPrice ?? 0,
+      cost_text: trainPrice === null
+        ? "Fare unavailable"
+        : (train.price || `₹${trainPrice.toLocaleString("en-IN")}`),
+      is_train_entry: true
+    });
+    
+    showToast(`✓ ${train.train_name} added to your trip itinerary!`);
   }
   
   renderTrip(latestTrip);
@@ -320,7 +375,7 @@ function renderItinerary(items) {
                 <div class="activity-main-col">
                   <div class="activity-title-row">
                     <h4>${esc(act.title)}</h4>
-                    <span class="status-badge ${act.status === 'VERIFIED' ? 'VERIFIED' : 'ESTIMATED'}">${esc(act.status)}</span>
+                    <span class="status-badge ${esc(act.status || 'ESTIMATED').replace(/\s+/g, '-')}">${esc(act.status)}</span>
                   </div>
                   <div class="activity-location">📍 ${esc(act.location)}</div>
                   <p class="activity-desc">${esc(act.description)}</p>
@@ -339,9 +394,11 @@ function renderItinerary(items) {
 }
 
 function renderFlightCards(flights) {
+  if (!flights || flights.length === 0) return `<div class="empty-notice">No flights available.</div>`;
+
   return `
     <div class="cards">
-      ${(flights || []).map((f, i) => {
+      ${flights.map((f, i) => {
         const isChosen = selectedFlight && selectedFlight.flight_number === f.flight_number;
         return `
           <article class="data-card provider-card ${isChosen ? 'is-selected-card' : ''}">
@@ -350,7 +407,7 @@ function renderFlightCards(flights) {
                 <h4>✈️ ${esc(f.airline)}</h4>
                 <span class="sub-code">${esc(f.flight_number || "Scheduled Flight")}</span>
               </div>
-              <span class="status-badge ${f.status || 'ESTIMATED'}">${esc(f.status || 'ESTIMATED')}</span>
+              <span class="status-badge ${esc(f.status || 'ESTIMATED').replace(/\s+/g, '-')}">${esc(f.status || 'ESTIMATED')}</span>
             </div>
             <div class="flight-timings-grid">
               <div class="timing-block">
@@ -383,13 +440,105 @@ function renderFlightCards(flights) {
   `;
 }
 
+function renderTrainCards(trains) {
+  if (!trains || trains.length === 0) return `<div class="empty-notice">No train options found for this route.</div>`;
+
+  // Handle a single error/unavailable entry returned by search_trains() on failure
+  if (trains.length === 1 && (trains[0].status === 'UNAVAILABLE' || trains[0].message)) {
+    const unavailable = trains[0];
+    const alternates = Array.isArray(unavailable.alternate_dates)
+      ? unavailable.alternate_dates
+      : [];
+    if (alternates.length && unavailable.date) {
+      const requestedDate = new Date(`${unavailable.date}T12:00:00`);
+      const requestedLabel = `${requestedDate.toLocaleDateString("en", { weekday: "short" })}, ${requestedDate.getDate()} ${requestedDate.toLocaleDateString("en", { month: "short" })}`;
+      const alternateLines = alternates.map(alternate => {
+        const alternateDate = new Date(`${alternate.date}T12:00:00`);
+        const label = `${esc(alternate.weekday || alternateDate.toLocaleDateString("en", { weekday: "short" }))} ${alternateDate.getDate()} ${alternateDate.toLocaleDateString("en", { month: "short" })}`;
+        const available = Array.isArray(alternate.trains) ? alternate.trains : [];
+        const trainNames = available.map(train => `${train.number || "?"} ${train.name || "Unknown train"}`).join(", ");
+        const count = available.length;
+        return `<li>${label} - ${count} train${count === 1 ? "" : "s"}: ${esc(trainNames)}</li>`;
+      }).join("");
+      return `
+        <div class="empty-notice train-error-notice">
+          <span>No trains on ${esc(requestedLabel)}. Trains on this route run on:</span>
+          <ul>${alternateLines}</ul>
+        </div>
+      `;
+    }
+
+    const msg = unavailable.message || unavailable.status || 'Train search unavailable for this route.';
+    return `
+      <div class="empty-notice train-error-notice">
+        <span style="font-size:1.2em">⚠️</span>
+        <span>${esc(msg)}</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="cards">
+      ${trains.map((t, i) => {
+        const isChosen = sameTrainOption(selectedTrain, t);
+        const classesText = Array.isArray(t.available_classes) && t.available_classes.length > 0 
+          ? t.available_classes.join(" · ") 
+          : (t.available_classes || "");
+        const priceAvailable = Number.isFinite(t.price_num);
+        const priceDisplay = priceAvailable
+          ? (t.price || `₹${t.price_num.toLocaleString("en-IN")}`)
+          : "Fare unavailable";
+
+        return `
+          <article class="data-card provider-card ${isChosen ? 'is-selected-card' : ''}">
+            <div class="card-header-row">
+              <div>
+                <h4>🚆 ${esc(t.train_name)}</h4>
+                <span class="sub-code">${esc(t.train_number || "Train Number")}</span>
+              </div>
+              <span class="status-badge ${esc(t.status || 'ESTIMATED').replace(/\s+/g, '-')}">${esc(t.status || 'ESTIMATED')}</span>
+            </div>
+            <div class="flight-timings-grid">
+              <div class="timing-block">
+                <strong class="time">${esc(t.departure_time || "16:55")}</strong>
+                <small>${esc(t.departure_station || "Departure")}</small>
+              </div>
+              <div class="flight-path">
+                <span>${esc(t.duration || "On schedule")}</span>
+                <div class="path-line"></div>
+              </div>
+              <div class="timing-block">
+                <strong class="time">${esc(t.arrival_time || "08:35")}</strong>
+                <small>${esc(t.arrival_station || latestTrip?.selected_destination || "Arrival")}</small>
+              </div>
+            </div>
+            ${classesText ? `<div class="card-section"><span class="travel-text">🧳 ${esc(classesText)}</span></div>` : ""}
+            ${t.rail_ends_note ? `<div class="card-section"><span class="travel-text">${esc(t.rail_ends_note)}</span></div>` : ""}
+            ${t.price_note ? `<div class="card-section"><span class="travel-text">${esc(t.price_note)}</span></div>` : ""}
+            <div class="card-action-row provider-action-row">
+              <div class="price-block">
+                <span class="price-val">${esc(priceDisplay)}</span>
+                <small>${priceAvailable ? `/ person${t.price_class ? ` · ${esc(t.price_class)}` : ""}` : (t.price_class ? `Class ${esc(t.price_class)}` : "")}</small>
+                ${t.price_status === "ESTIMATED" ? `<span class="status-badge">Estimated</span>` : ""}
+              </div>
+              <button class="primary ${isChosen ? 'added-btn' : ''}" type="button" onclick="toggleTrainSelection(${i})">
+                ${isChosen ? '✓ In Itinerary' : '+ Add to Itinerary'}
+              </button>
+            </div>
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
 function renderHotelCards(hotels) {
   if (!hotels || !hotels.length) {
     return `<div class="empty-notice">No hotels found. Use the Replanning Assistant below to search hotels near any landmark.</div>`;
   }
   return `
     <div class="cards" id="hotelsGridContainer">
-      ${(hotels || []).map((h, i) => {
+      ${hotels.map((h, i) => {
         const isChosen = selectedHotel && selectedHotel.name === h.name;
         const bookingLink = h.booking_url || `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(h.name + ' ' + (latestTrip?.selected_destination || ''))}`;
         return `
@@ -427,9 +576,11 @@ function renderHotelCards(hotels) {
 }
 
 function renderCabCards(cabs) {
+  if (!cabs || cabs.length === 0) return `<div class="empty-notice">No cabs available.</div>`;
+
   return `
     <div class="cards">
-      ${(cabs || []).map((c, i) => {
+      ${cabs.map((c, i) => {
         const isChosen = selectedCab && selectedCab.name === c.name;
         return `
           <article class="data-card provider-card ${isChosen ? 'is-selected-card' : ''}">
@@ -438,7 +589,7 @@ function renderCabCards(cabs) {
                 <h4>🚗 ${esc(c.name)}</h4>
                 <span class="sub-code">${esc(c.route)}</span>
               </div>
-              <span class="status-badge ESTIMATED">ESTIMATED</span>
+              <span class="status-badge ${esc(c.status || 'ESTIMATED').replace(/\s+/g, '-')}">${esc(c.status || 'ESTIMATED')}</span>
             </div>
             <div class="card-section">
               <span class="card-label">Vehicle & Service:</span>
@@ -462,17 +613,18 @@ function renderCabCards(cabs) {
 
 function renderBudgetBreakdown(trip) {
   const flightCost = selectedFlight ? (selectedFlight.price_num || parseCurrencyNum(selectedFlight.price)) : 0;
+  const trainCost = selectedTrain && Number.isFinite(selectedTrain.price_num) ? selectedTrain.price_num : 0;
   const hotelCost = selectedHotel ? (selectedHotel.total_num || parseCurrencyNum(selectedHotel.total_price)) : 0;
   const cabCost = selectedCab ? (selectedCab.price_num || parseCurrencyNum(selectedCab.price)) : 0;
   
   let activitiesCost = 0;
   (trip.itinerary_items || []).forEach(act => {
-    if (!act.is_flight_entry && !act.is_hotel_entry && !act.is_cab_entry) {
+    if (!act.is_flight_entry && !act.is_hotel_entry && !act.is_train_entry && !act.is_cab_entry) {
       if (act.cost) activitiesCost += Number(act.cost);
     }
   });
 
-  const confirmedTotal = flightCost + hotelCost + cabCost + activitiesCost;
+  const confirmedTotal = flightCost + trainCost + hotelCost + cabCost + activitiesCost;
   const userBudget = trip.request?.budget ? Number(trip.request.budget) : null;
   
   let budgetComparison = "";
@@ -493,6 +645,14 @@ function renderBudgetBreakdown(trip) {
             <small>${selectedFlight ? `Selected (${selectedFlight.airline})` : 'Not added yet'}</small>
           </div>
           <strong class="budget-item-amount">${flightCost ? `₹${flightCost.toLocaleString("en-IN")}` : '₹0'}</strong>
+        </div>
+
+        <div class="budget-item ${selectedTrain ? 'is-confirmed' : 'is-pending'}">
+          <div class="budget-item-title">
+            <span>🚆 Trains</span>
+            <small>${selectedTrain ? `Selected (${selectedTrain.train_name})` : 'Not added yet'}</small>
+          </div>
+          <strong class="budget-item-amount">${trainCost ? `₹${trainCost.toLocaleString("en-IN")}` : '₹0'}</strong>
         </div>
 
         <div class="budget-item ${selectedHotel ? 'is-confirmed' : 'is-pending'}">
@@ -593,10 +753,59 @@ function renderTrip(trip) {
     </div>
   `;
 
+  // ── Planner decision note ──
+  let plannerHtml = "";
+  const ep = trip.execution_plan;
+  if (ep) {
+    const skipped = [];
+    if (!ep.include_flights)         skipped.push("Flights");
+    if (!ep.include_trains)          skipped.push("Trains");
+    if (!ep.include_events)          skipped.push("Events");
+    if (!ep.include_places)          skipped.push("Places");
+    if (!ep.include_hotels)          skipped.push("Hotels");
+    if (!ep.include_travel_insights) skipped.push("Travel Insights");
+    const skippedText = skipped.length
+      ? `Skipped: <strong>${skipped.join(", ")}</strong>`
+      : "All agents active";
+    plannerHtml = section("\u{1F9E0} Planner Decision", `
+      <div style="padding:.6rem 1rem">
+        <p style="margin:0 0 .35rem"><strong>Reasoning:</strong> ${esc(ep.reasoning || "\u2014")}</p>
+        <p style="margin:0"><strong>Primary transport:</strong> ${esc(ep.primary_transport || "flight")} \u00B7 ${skippedText}</p>
+      </div>
+    `, "AI Planner");
+  }
+
+  // ── Critic review badge ──
+  let criticHtml = "";
+  const revCount = trip.revision_count || 0;
+  const critiqueHist = trip.critique_history || [];
+  if (critiqueHist.length > 0) {
+    const last = critiqueHist[critiqueHist.length - 1];
+    const issueItems = (last.issues || []).map(i =>
+      `<li><span class="status-badge ${i.severity === 'high' ? 'UNAVAILABLE' : 'ESTIMATED'}">${esc(i.severity)}</span> ${esc(i.description)}</li>`
+    ).join("");
+    const issueList = issueItems
+      ? `<ul style="margin:.4rem 0 0;padding-left:1.2rem;font-size:.92em">${issueItems}</ul>`
+      : `<p style="margin:.3rem 0 0;color:#6dffb0;font-size:.92em">\u2713 No issues found</p>`;
+    const badge = last.verdict === "approve" ? "Approved" : "Revised";
+    criticHtml = section("\uD83D\uDD0D Itinerary Review", `
+      <div style="padding:.6rem 1rem">
+        <p style="margin:0 0 .3rem">
+          <strong>Reviewed ${revCount} time(s)</strong> \u00B7 Final verdict:
+          <span class="section-tag">${esc(badge)}</span>
+        </p>
+        ${issueList}
+      </div>
+    `, "Quality Check");
+  }
+
   const dashboardHtml = `
     ${tripSummaryHtml}
+    ${plannerHtml}
+    ${criticHtml}
     ${section("Day-by-Day Verified Itinerary", renderItinerary(trip.itinerary_items), "Interactive Schedule")}
     ${section("Flight Options (Select to add to Itinerary)", renderFlightCards(trip.flights), "Live / Estimated")}
+    ${section("Train Options (Select to add to Itinerary)", renderTrainCards(trip.trains), "Live / Estimated")}
     <div id="hotelRecommendationsSection">
       ${section("Accommodation Recommendations (Select to add to Itinerary)", renderHotelCards(trip.hotels), "Verified Stays")}
     </div>
@@ -725,7 +934,7 @@ async function handleReplanning(changeText) {
       body: JSON.stringify({
         trip_id: latestTrip.trip_id || "current",
         change_text: changeText,
-        itinerary: (latestTrip.itinerary_items || []).filter(act => !act.is_flight_entry && !act.is_hotel_entry && !act.is_cab_entry).map(act => ({
+        itinerary: (latestTrip.itinerary_items || []).filter(act => !act.is_flight_entry && !act.is_train_entry && !act.is_hotel_entry && !act.is_cab_entry).map(act => ({
           date: act.date,
           start_time: act.start_time,
           end_time: act.end_time || "Flexible",
@@ -773,7 +982,7 @@ async function handleReplanning(changeText) {
       is_custom: true
     }));
 
-    // Re-attach confirmed flights/hotels/cabs if selected
+    // Re-attach confirmed flights/trains/hotels/cabs if selected
     if (selectedFlight) {
       updatedActivities.unshift({
         date: latestTrip.request.start_date,
@@ -787,6 +996,22 @@ async function handleReplanning(changeText) {
         cost: selectedFlight.price_num,
         cost_text: selectedFlight.price,
         is_flight_entry: true
+      });
+    }
+
+    if (selectedTrain) {
+      updatedActivities.splice(1, 0, {
+        date: latestTrip.request.start_date,
+        start_time: selectedTrain.departure_time || "16:55",
+        end_time: selectedTrain.arrival_time || "08:35",
+        title: `🚆 Confirmed Train: ${selectedTrain.train_name} (${selectedTrain.train_number})`,
+        location: `${selectedTrain.departure_station || latestTrip.request.origin} → ${selectedTrain.arrival_station || latestTrip.selected_destination}`,
+        description: `Confirmed rail booking. Classes available: ${selectedTrain.available_classes ? selectedTrain.available_classes.join(" · ") : "AC / Sleeper"}. Duration: ${selectedTrain.duration || "On schedule"}.`,
+        reason: "Confirmed Rail Booking",
+        status: "VERIFIED",
+        cost: selectedTrain.price_num,
+        cost_text: selectedTrain.price,
+        is_train_entry: true
       });
     }
 
